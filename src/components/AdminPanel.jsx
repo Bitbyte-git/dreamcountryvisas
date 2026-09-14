@@ -120,6 +120,7 @@ function AdminDashboard() {
       const haystack = [
         r.salutation, r.first_name, r.last_name, r.email, r.phone, r.phone_code,
         r.program, r.english_level, r.nationality, r.residence,
+        r.source === 'chatbot' ? 'chatbot' : 'website',
       ].filter(Boolean).join(' ').toLowerCase();
       return haystack.includes(q);
     });
@@ -223,6 +224,7 @@ function AdminDashboard() {
                   <th>Name</th>
                   <th>Phone</th>
                   <th>Email</th>
+                  <th>Source</th>
                   <th>Category</th>
                   <th>Program</th>
                   <th>English Level</th>
@@ -233,12 +235,13 @@ function AdminDashboard() {
               <tbody>
                 {!loading && visibleRows.length === 0 && (
                   <tr>
-                    <td colSpan={10} className="admin-empty">No submissions match.</td>
+                    <td colSpan={11} className="admin-empty">No submissions match.</td>
                   </tr>
                 )}
                 {visibleRows.map((r) => {
                   const created = new Date(r.created_at);
                   const cat = deriveCategory(r.program);
+                  const isChatbot = r.source === 'chatbot';
                   return (
                     <tr key={r.id}>
                       <td>{created.toLocaleDateString()}</td>
@@ -246,6 +249,11 @@ function AdminDashboard() {
                       <td>{[r.salutation, r.first_name, r.last_name].filter(Boolean).join(' ')}</td>
                       <td>{[r.phone_code, r.phone].filter(Boolean).join(' ')}</td>
                       <td>{r.email}</td>
+                      <td>
+                        <span className={`admin-source-badge ${isChatbot ? 'src-chatbot' : 'src-website'}`}>
+                          {isChatbot ? '🤖 Chatbot' : '🌐 Website'}
+                        </span>
+                      </td>
                       <td><span className={`admin-cat-badge ${CATEGORY_BADGE_CLASS[cat]}`}>{cat}</span></td>
                       <td>{r.program || '—'}</td>
                       <td>{r.english_level || '—'}</td>

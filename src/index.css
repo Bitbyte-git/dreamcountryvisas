@@ -9883,6 +9883,18 @@ h2.center {
 .admin-cat-badge.cat-pr { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
 .admin-cat-badge.cat-other { background: rgba(100, 116, 139, 0.12); color: #475569; }
 
+.admin-source-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.admin-source-badge.src-chatbot { background: rgba(245, 179, 1, 0.16); color: #92600a; }
+.admin-source-badge.src-website { background: rgba(27, 42, 107, 0.08); color: var(--navy); }
+
 .admin-table tr:last-child td {
   border-bottom: none;
 }
