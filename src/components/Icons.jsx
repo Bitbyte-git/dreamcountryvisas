@@ -171,6 +171,19 @@ export function Icon({ name, size = 22 }) {
           <path d="M20 6 9 17l-5-5" strokeWidth="2.2" />
         </svg>
       );
+    case 'chat':
+      return (
+        <svg {...p}>
+          <path d="M4 5.5h16v11H8.5L4 20.5v-4H4z" />
+          <path d="M8 9.5h8M8 13h5" />
+        </svg>
+      );
+    case 'close':
+      return (
+        <svg {...p}>
+          <path d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      );
     case 'eye':
       return (
         <svg {...p}>

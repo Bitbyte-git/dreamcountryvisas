@@ -29,6 +29,7 @@ import OtherServiceOverview from './OtherService/OtherServiceOverview.jsx';
 import LoginPage from './components/LoginPage.jsx';
 import AdminPanel from './components/AdminPanel.jsx';
 import AdminNavbar from './components/AdminNavbar.jsx';
+import ChatBot from './components/ChatBot.jsx';
 
 
 function ScrollToTop() {
@@ -108,6 +109,7 @@ function Chrome({ children }) {
       {isAdminArea ? <AdminNavbar /> : <Navbar />}
       {children}
       {!isAdminArea && <Footer />}
+      {!isAdminArea && <ChatBot />}
     </>
   );
 }
