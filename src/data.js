@@ -17,7 +17,7 @@ export const CONTACT = {
   ],
   offices: [
     {
-      label: 'Head Office',
+      label: 'New Delhi Registered Office',
       address: 'Hemkunt Chambers, 310, 3rd Floor, Nehru Place, New Delhi, Delhi 110019',
       mapLink: 'https://maps.app.goo.gl/BhD62mYck7xi5RcM6',
     },

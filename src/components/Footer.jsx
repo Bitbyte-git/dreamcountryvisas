@@ -27,7 +27,6 @@ export default function Footer() {
             <a href="#" aria-label="LinkedIn"><Icon name="linkedin" size={15} /></a>
             <a href="#" aria-label="Facebook"><Icon name="facebook" size={15} /></a>
             <a href="#" aria-label="Instagram"><Icon name="instagram" size={15} /></a>
-            <a href="#" aria-label="YouTube"><Icon name="youtube" size={15} /></a>
           </div>
         </div>
 

@@ -178,6 +178,13 @@ export function Icon({ name, size = 22 }) {
           <path d="M8 9.5h8M8 13h5" />
         </svg>
       );
+    case 'download':
+      return (
+        <svg {...p}>
+          <path d="M12 3v12m0 0-4.5-4.5M12 15l4.5-4.5" />
+          <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2" />
+        </svg>
+      );
     case 'close':
       return (
         <svg {...p}>

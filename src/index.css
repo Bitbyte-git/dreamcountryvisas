@@ -9819,6 +9819,37 @@ h2.center {
   box-shadow: 0 0 0 3px rgba(27, 42, 107, 0.12);
 }
 
+.admin-export-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 42px;
+  padding: 0 16px;
+  border: 1.5px solid var(--navy);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--navy);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-export-btn:hover {
+  background: var(--navy);
+  color: #fff;
+}
+
+.admin-export-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.admin-export-btn:disabled:hover {
+  background: #fff;
+  color: var(--navy);
+}
+
 .admin-count {
   color: var(--muted);
   font-size: 0.82rem;
