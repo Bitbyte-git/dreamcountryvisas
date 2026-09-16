@@ -19,7 +19,7 @@ export default function PROverview() {
       tagline: 'Subclass 189, 190 & 491 Pathways',
       badge: '🇦🇺 SKILLED MIGRATION',
       image: '/images/country-australia.webp',
-      price: 'from AUD 4,640',
+      price: 'from AUD 6,135',
       time: '6–12 Months',
       desc: 'Points-tested skilled migration pathways for experienced professionals seeking high quality of life, excellent salaries, and permanent settlement.',
       highlights: [

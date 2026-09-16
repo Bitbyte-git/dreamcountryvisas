@@ -156,7 +156,13 @@ export default function Navbar() {
             >
               <Icon name="whatsapp" size={18} />
             </a>
-            <a href="#" className="nav-circle linkedin" aria-label="LinkedIn">
+            <a
+              href="https://www.linkedin.com/company/31293454/"
+              className="nav-circle linkedin"
+              target="_blank"
+              rel="noreferrer"
+              aria-label="LinkedIn"
+            >
               <Icon name="linkedin" size={16} />
             </a>
                        <button

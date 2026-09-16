@@ -444,13 +444,13 @@ export default function LicensePage() {
             {/* Left: Description */}
             <div className="license-info-col">
               <p className="section-tag left">INTERNATIONAL AUTHORIZATION</p>
-              <h2>Authorized Partner Certificate (Cyprus Immigrant Investor)</h2>
+              <h2>Authorized Partner Certificate (Quebec Immigrant Investor)</h2>
               <div className="license-status-badge">
                 <span className="status-dot green"></span>
                 <span>Verified International Representative Appointment</span>
               </div>
               <p className="license-desc-lead">
-                Formally appointed to promote and represent the Cyprus Immigrant Investor Program and European mobility pathways.
+                Formally appointed to promote and represent the Quebec Immigrant Investor Program and European mobility pathways.
               </p>
               <p className="license-desc-body">
                 This official certification authorizes our firm to structure and submit qualifying investor residency applications with direct partner coordination.
@@ -461,7 +461,7 @@ export default function LicensePage() {
                   <Icon name="certificate" size={20} />
                   <div>
                     <h4>Official Program Partner</h4>
-                    <p>Direct accreditation to facilitate Cyprus Immigrant Investor cases.</p>
+                    <p>Direct accreditation to facilitate Quebec Immigrant Investor cases.</p>
                   </div>
                 </div>
                 <div className="highlight-box">
@@ -494,7 +494,7 @@ export default function LicensePage() {
                 <div className="cert-doc-wrapper partner-doc-wrap">
                   <img
                     src="/landing-img/DC-certification.webp"
-                    alt="Authorized Partner Certificate - Cyprus Immigrant Investor"
+                    alt="Authorized Partner Certificate - Quebec Immigrant Investor"
                     className="doc-preview-img partner-img"
                     loading="lazy"
                   />

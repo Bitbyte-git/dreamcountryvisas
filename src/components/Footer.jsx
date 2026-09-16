@@ -24,7 +24,7 @@ export default function Footer() {
           <img src="/landing-img/DC-log.webp" alt="Dream Country Visas" />
           <p className="footer-about-text">{FOOTER.about}</p>
           <div className="footer-socials">
-            <a href="#" aria-label="LinkedIn"><Icon name="linkedin" size={15} /></a>
+            <a href="https://www.linkedin.com/company/31293454/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Icon name="linkedin" size={15} /></a>
             <a href="#" aria-label="Facebook"><Icon name="facebook" size={15} /></a>
             <a href="#" aria-label="Instagram"><Icon name="instagram" size={15} /></a>
           </div>
