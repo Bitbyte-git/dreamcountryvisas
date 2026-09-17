@@ -1,18 +1,23 @@
 // Dream Country Visas — API Server (contact form, auth, admin dashboard)
 // Runs on port 3001; Vite dev server proxies /api/* here.
+//
+// No top-level await anywhere in this module or its imports below — Hostinger's
+// Node hosting loads the entry file via require(), which throws
+// ERR_REQUIRE_ASYNC_MODULE on an ESM graph that uses top-level await.
+import 'dotenv/config'; // load .env from project root (process cwd) — must run before db.js reads DB_* env vars
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { config } from 'dotenv';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-config(); // load .env from project root (process cwd)
+import './db.js';
+import contactRoutes from './routes/contact.js';
+import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 
-// Imported after config() so DB_* env vars are already loaded when db.js runs.
-await import('./db.js');
-
-const { default: contactRoutes } = await import('./routes/contact.js');
-const { default: authRoutes } = await import('./routes/auth.js');
-const { default: adminRoutes } = await import('./routes/admin.js');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const distPath = path.join(__dirname, '..', 'dist');
 
 // Only these origins may call the API from a browser. Add production
 // domains here (or via CORS_ORIGINS in .env) before going live elsewhere.
@@ -24,6 +29,7 @@ const DEFAULT_ORIGINS = [
   'https://www.dreamcountryvisas.com',
   'https://dreamcountryvisas.in',
   'https://www.dreamcountryvisas.in',
+  'https://snow-partridge-646013.hostingersite.com', // temporary Hostinger test subdomain — remove once live on the real domain
 ];
 const ALLOWED_ORIGINS = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((o) => o.trim()).filter(Boolean)
@@ -32,7 +38,12 @@ const ALLOWED_ORIGINS = process.env.CORS_ORIGINS
 const app = express();
 app.use(helmet());
 app.use(express.json());
-app.use(cors({
+
+// CORS only applies to the API — the built frontend's own JS/CSS is fetched
+// with `crossorigin` (Vite's default for module scripts), which sends an
+// Origin header even for same-origin requests. Scoping this to /api avoids
+// rejecting the site's own static assets when their origin isn't whitelisted.
+const corsMiddleware = cors({
   origin(origin, callback) {
     // No Origin header (e.g. curl, server-to-server, Vite's own proxy) — allow.
     if (!origin || ALLOWED_ORIGINS.includes(origin)) {
@@ -41,13 +52,18 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-}));
+});
 
-app.use('/api/contact', contactRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/admin', adminRoutes);
+app.use('/api/contact', corsMiddleware, contactRoutes);
+app.use('/api/auth', corsMiddleware, authRoutes);
+app.use('/api/admin', corsMiddleware, adminRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// Serve the built frontend (dist/) and fall back to index.html for
+// React Router routes, without swallowing unmatched /api/* requests.
+app.use(express.static(distPath));
+app.get(/^\/(?!api).*/, (_req, res) => res.sendFile(path.join(distPath, 'index.html')));
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
