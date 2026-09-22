@@ -30,6 +30,9 @@ import LoginPage from './components/LoginPage.jsx';
 import AdminPanel from './components/AdminPanel.jsx';
 import AdminNavbar from './components/AdminNavbar.jsx';
 import ChatBot from './components/ChatBot.jsx';
+import SEO_DATA from './seoData.js';
+
+const CANONICAL_ORIGIN = 'https://dreamcountryvisas.com';
 
 
 function ScrollToTop() {
@@ -86,13 +89,55 @@ function pageTitleForPath(pathname) {
   return null;
 }
 
-// Keeps the browser tab title in sync with the current route.
-function PageTitle() {
+function setMetaTag(name, content) {
+  let tag = document.querySelector(`meta[name="${name}"]`);
+  if (!tag) {
+    tag = document.createElement('meta');
+    tag.setAttribute('name', name);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute('content', content);
+}
+
+function setCanonicalLink(href) {
+  let link = document.querySelector('link[rel="canonical"]');
+  if (!link) {
+    link = document.createElement('link');
+    link.setAttribute('rel', 'canonical');
+    document.head.appendChild(link);
+  }
+  link.setAttribute('href', href);
+}
+
+// Keeps the tab title, meta description/keywords and canonical link in sync
+// with the current route. Canonical always points at dreamcountryvisas.com —
+// even when the site is served from dreamcountryvisas.in — since both
+// domains serve identical content and .com is the single indexed version.
+function SEO() {
   const { pathname } = useLocation();
 
   useEffect(() => {
-    const page = pageTitleForPath(pathname);
-    document.title = page ? `${page} | Dream Country Visas` : 'Dream Country Visas';
+    const entry = SEO_DATA[pathname];
+    const fallbackPage = pageTitleForPath(pathname);
+
+    document.title = entry
+      ? entry.title
+      : fallbackPage
+      ? `${fallbackPage} | Dream Country Visas`
+      : 'Dream Country Visas';
+
+    setMetaTag(
+      'description',
+      entry
+        ? entry.description
+        : 'Dream Country Visas — Residency, Citizenship and Real Estate Investment solutions across 50+ countries.'
+    );
+
+    if (entry) {
+      setMetaTag('keywords', entry.keywords);
+    }
+
+    setCanonicalLink(`${CANONICAL_ORIGIN}${pathname === '/' ? '/' : pathname.replace(/\/$/, '')}`);
   }, [pathname]);
 
   return null;
@@ -146,7 +191,7 @@ export default function App() {
   return (
         <BrowserRouter>
       <ScrollToTop />
-      <PageTitle />
+      <SEO />
       <Chrome>
         <Routes>
           <Route path="/" element={<Home />} />
