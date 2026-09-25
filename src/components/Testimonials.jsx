@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { TESTIMONIALS } from '../data.js';
 import { Icon } from './Icons.jsx';
 
@@ -22,6 +23,8 @@ function getInitials(name) {
 }
 
 function TestiCard({ t, index }) {
+  const [imgError, setImgError] = useState(false);
+
   return (
     <div className={`testi-card ${index === 2 ? 'featured' : ''}`}>
       <div className="testi-card-header">
@@ -30,7 +33,20 @@ function TestiCard({ t, index }) {
       </div>
       <p className="testi-text">&ldquo;{t.text}&rdquo;</p>
       <div className="testi-person">
-        <div className="testi-avatar">{getInitials(t.name)}</div>
+        <div className="testi-avatar">
+          {t.image && !imgError ? (
+            <img
+              src={t.image}
+              alt={t.name}
+              className="testi-avatar-img"
+              style={{ objectPosition: t.imagePosition || 'center 12%' }}
+              loading="lazy"
+              onError={() => setImgError(true)}
+            />
+          ) : (
+            getInitials(t.name)
+          )}
+        </div>
         <div className="testi-person-meta">
           <strong>{t.name}</strong>
           <span className="testi-verified">

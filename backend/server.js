@@ -36,7 +36,24 @@ const ALLOWED_ORIGINS = process.env.CORS_ORIGINS
   : DEFAULT_ORIGINS;
 
 const app = express();
-app.use(helmet());
+// Helmet's default CSP blocks third-party scripts — allow Google Analytics
+// (hosts per Google's GA4 CSP guidance). Everything else keeps the defaults.
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        scriptSrc: ["'self'", 'https://*.googletagmanager.com'],
+        connectSrc: [
+          "'self'",
+          'https://*.google-analytics.com',
+          'https://*.analytics.google.com',
+          'https://*.googletagmanager.com',
+        ],
+        imgSrc: ["'self'", 'data:', 'https://*.google-analytics.com', 'https://*.googletagmanager.com'],
+      },
+    },
+  })
+);
 app.use(express.json());
 
 // CORS only applies to the API — the built frontend's own JS/CSS is fetched

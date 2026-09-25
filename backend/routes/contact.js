@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import sgMail from '@sendgrid/mail';
 import dns from 'dns';
-import { pool } from '../db.js';
+import { pool, schema } from '../db.js';
 import { contactLimiter } from '../middleware/rateLimit.js';
 
 const dnsPromises = dns.promises;
@@ -24,6 +24,23 @@ sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const rawTo = process.env.SENDGRID_TO_EMAIL || 'infisq.senthil@gmail.com';
 const TO_EMAILS = rawTo.split(',').map((e) => e.trim()).filter(Boolean);
 const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'infisq.senthil@gmail.com';
+
+// The site the form was filled on — both domains run this same app, so the
+// browser's Origin header (always sent on the form's POST) tells them apart.
+// Falls back to Referer, then Host. Stored without "www." so the admin sees
+// just "dreamcountryvisas.com" or "dreamcountryvisas.in".
+function submittingDomain(req) {
+  const candidates = [req.get('origin'), req.get('referer')];
+  for (const value of candidates) {
+    if (!value) continue;
+    try {
+      return new URL(value).hostname.replace(/^www\./, '').slice(0, 100);
+    } catch {
+      // malformed header — try the next one
+    }
+  }
+  return (req.hostname || '').replace(/^www\./, '').slice(0, 100) || null;
+}
 
 /**
  * Validates whether the email's domain actually has active mail exchange (MX) servers.
@@ -68,24 +85,34 @@ router.post('/', contactLimiter, async (req, res) => {
       });
     }
 
+    const domain = submittingDomain(req);
+
+    const columns = [
+      'source', 'program', 'english_level', 'salutation', 'first_name', 'last_name',
+      'phone_code', 'phone', 'email', 'nationality', 'residence', 'updates_opt_in',
+    ];
+    const values = [
+      d.source || 'website',
+      d.program || null,
+      d.englishLevel || null,
+      d.salutation || null,
+      d.firstName || null,
+      d.lastName || null,
+      d.phoneCode || null,
+      d.phone || null,
+      d.email || null,
+      d.nationality || null,
+      d.residence || null,
+      d.updates ? 1 : 0,
+    ];
+    if (schema.hasDomain) {
+      columns.push('domain');
+      values.push(domain);
+    }
+
     await pool.query(
-      `INSERT INTO submissions
-        (source, program, english_level, salutation, first_name, last_name, phone_code, phone, email, nationality, residence, updates_opt_in)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        d.source || 'website',
-        d.program || null,
-        d.englishLevel || null,
-        d.salutation || null,
-        d.firstName || null,
-        d.lastName || null,
-        d.phoneCode || null,
-        d.phone || null,
-        d.email || null,
-        d.nationality || null,
-        d.residence || null,
-        d.updates ? 1 : 0,
-      ]
+      `INSERT INTO submissions (${columns.join(', ')}) VALUES (${columns.map(() => '?').join(', ')})`,
+      values
     );
 
     // Everything below is escaped before going into the HTML email — raw
@@ -101,6 +128,7 @@ router.post('/', contactLimiter, async (req, res) => {
       email: escapeHtml(d.email) || '—',
       nationality: escapeHtml(d.nationality) || '—',
       residence: escapeHtml(d.residence) || '—',
+      domain: escapeHtml(domain) || '—',
     };
 
     const html = `
@@ -150,6 +178,13 @@ router.post('/', contactLimiter, async (req, res) => {
             </tr>
 
             <tr>
+              <td colspan="2" style="padding:16px 0 8px;font-size:14px">
+                <div style="color:#555;margin-bottom:4px"><strong>Submitted On Website</strong></div>
+                <div style="font-size:15px">${safe.domain}</div>
+              </td>
+            </tr>
+
+            <tr>
               <td colspan="2" style="padding:16px 0 0;font-size:13px;color:#888">
                 Marketing consent: <strong>${d.updates ? 'Yes — keep me updated' : 'No'}</strong>
               </td>
@@ -175,7 +210,7 @@ router.post('/', contactLimiter, async (req, res) => {
       to: TO_EMAILS.length === 1 ? TO_EMAILS[0] : TO_EMAILS,
       from: FROM_EMAIL,
       replyTo: stripNewlines(d.email),
-      subject: `New Enquiry – ${stripNewlines(d.salutation)} ${stripNewlines(d.firstName)} ${stripNewlines(d.lastName)} | ${stripNewlines(d.program) || 'General'}`,
+      subject: `New Enquiry – ${stripNewlines(d.salutation)} ${stripNewlines(d.firstName)} ${stripNewlines(d.lastName)} | ${stripNewlines(d.program) || 'General'}${domain ? ` [${stripNewlines(domain)}]` : ''}`,
       html,
     };
 

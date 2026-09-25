@@ -33,20 +33,6 @@ const GST_SLIDES = [
       'Full Statutory Tax Compliance Verified',
     ],
   },
-  {
-    id: 3,
-    image: '/landing-img/dreamcountry-visas-certificate-of-incorporation-3.webp',
-    label: 'Page 3 — Annexure B',
-    title: 'Annexure B — Managing Directors',
-    subtitle: 'Authorised Key Management Personnel',
-    description:
-      'Official government record of appointed managing directors responsible for governance and operations.',
-    points: [
-      'Director: Mohit Sharma (Delhi)',
-      'Director: Usha Sharma (Haryana)',
-      'Directorship recorded with Ministry & Tax Authorities',
-    ],
-  },
 ];
 
 const LICENSE_FAQS = [

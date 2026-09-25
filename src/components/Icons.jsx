@@ -42,6 +42,14 @@ export function Icon({ name, size = 22 }) {
           <path d="M3 12h18M12 3c2.8 2.6 4 5.7 4 9s-1.2 6.4-4 9c-2.8-2.6-4-5.7-4-9s1.2-6.4 4-9z" />
         </svg>
       );
+    case 'language':
+      return (
+        <svg {...p}>
+          <path d="M3.5 5.5h9M8 3.5v2M10.5 5.5c-.8 3.6-3.2 6.4-6.5 8" />
+          <path d="M6 9c1.1 2 2.8 3.6 5 4.6" />
+          <path d="m12 20.5 4-9 4 9M13.4 17.5h5.2" />
+        </svg>
+      );
     case 'support':
       return (
         <svg {...p}>

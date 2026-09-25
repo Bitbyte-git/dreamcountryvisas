@@ -52,7 +52,33 @@ async function init() {
     )
   `);
 
+  await ensureDomainColumn();
+
   console.log(`🗄️  MySQL ready — database "${DB_NAME}" @ ${DB_HOST}:${DB_PORT}`);
+}
+
+// Which site the enquiry came from (dreamcountryvisas.com vs .in). Added after
+// the table already existed in production, so it's migrated in place. The app
+// DB user may lack ALTER — then submissions keep working without the column
+// and the log says how to add it once.
+export const schema = { hasDomain: false };
+
+async function ensureDomainColumn() {
+  const [cols] = await pool.query(`SHOW COLUMNS FROM submissions LIKE 'domain'`);
+  if (cols.length) {
+    schema.hasDomain = true;
+    return;
+  }
+  try {
+    await pool.query(`ALTER TABLE submissions ADD COLUMN domain VARCHAR(100) NULL AFTER source`);
+    schema.hasDomain = true;
+    console.log('🗄️  Added "domain" column to submissions');
+  } catch (err) {
+    console.warn(
+      `⚠️  Could not add the "domain" column (${err.code || err.message}). ` +
+        'Run once as a MySQL admin: ALTER TABLE submissions ADD COLUMN domain VARCHAR(100) NULL AFTER source; — then restart the server.'
+    );
+  }
 }
 
 init().catch((err) => console.error('❌ MySQL init failed:', err.message));

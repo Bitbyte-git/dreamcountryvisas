@@ -5,7 +5,7 @@ import { Icon } from './Icons.jsx';
 // no mega menus, no topbar, no consultation CTA. Just brand + a way back.
 export default function AdminNavbar() {
   return (
-    <header className="admin-navbar">
+    <header className="admin-navbar" translate="no">
       <div className="admin-navbar-inner">
         <div className="admin-navbar-brand">
           <Link to="/">

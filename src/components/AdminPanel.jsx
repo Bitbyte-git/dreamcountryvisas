@@ -43,6 +43,21 @@ const CATEGORY_BADGE_CLASS = {
   'Other Service': 'cat-other',
 };
 
+const WEBSITES = [
+  { key: 'all', label: 'All Websites' },
+  { key: '.com', label: 'dreamcountryvisas.com' },
+  { key: '.in', label: 'dreamcountryvisas.in' },
+];
+
+// Short label for the site a submission came from. Rows saved before the
+// domain was tracked have none.
+function websiteLabel(domain) {
+  if (!domain) return 'N/A';
+  if (domain.endsWith('.in')) return '.in';
+  if (domain.endsWith('.com')) return '.com';
+  return domain; // e.g. localhost or a temporary test domain
+}
+
 function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
@@ -66,6 +81,7 @@ function AdminDashboard() {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All Categories');
+  const [website, setWebsite] = useState('all');
 
   const logout = useCallback(() => {
     clearAdminToken();
@@ -120,15 +136,18 @@ function AdminDashboard() {
       if (category !== 'All Categories' && deriveCategory(r.program) !== category) {
         return false;
       }
+      if (website !== 'all' && websiteLabel(r.domain) !== website) {
+        return false;
+      }
       if (!q) return true;
       const haystack = [
         r.salutation, r.first_name, r.last_name, r.email, r.phone, r.phone_code,
-        r.program, r.english_level, r.nationality, r.residence,
+        r.program, r.english_level, r.nationality, r.residence, r.domain,
         r.source === 'chatbot' ? 'chatbot' : 'website',
       ].filter(Boolean).join(' ').toLowerCase();
       return haystack.includes(q);
     });
-  }, [rows, search, category]);
+  }, [rows, search, category, website]);
 
   const stats = useMemo(() => {
     const counts = { Citizenship: 0, Residency: 0, 'Real Estate': 0, 'Permanent Residency (PR)': 0, 'Other Service': 0 };
@@ -147,6 +166,7 @@ function AdminDashboard() {
       Phone: [r.phone_code, r.phone].filter(Boolean).join(' '),
       Email: r.email || '',
       Source: r.source === 'chatbot' ? 'Chatbot' : 'Website',
+      Domain: r.domain || 'N/A',
       Category: deriveCategory(r.program),
       Program: r.program || '',
       'English Level': r.english_level || '',
@@ -238,7 +258,7 @@ function AdminDashboard() {
     autoTable(doc, {
       startY: HEADER_H + 16,
       margin: { left: 28, right: 28 },
-      head: [Object.keys(data[0] || { Date: '', Time: '', Name: '', Phone: '', Email: '', Source: '', Category: '', Program: '', 'English Level': '', Nationality: '', Residence: '' })],
+      head: [Object.keys(data[0] || { Date: '', Time: '', Name: '', Phone: '', Email: '', Source: '', Domain: '', Category: '', Program: '', 'English Level': '', Nationality: '', Residence: '' })],
       body: data.map((row) => Object.values(row)),
       styles: { fontSize: 8.5, cellPadding: 6, textColor: [35, 38, 47], lineColor: [228, 231, 240], lineWidth: 0.5 },
       headStyles: { fillColor: NAVY, textColor: 255, fontStyle: 'bold', fontSize: 8.5 },
@@ -249,9 +269,10 @@ function AdminDashboard() {
         2: { cellWidth: 95 },
         3: { cellWidth: 72 },
         5: { cellWidth: 48, halign: 'center' },
-        6: { cellWidth: 90 },
-        8: { cellWidth: 68, halign: 'center' },
-        9: { cellWidth: 55 },
+        6: { cellWidth: 84 },
+        7: { cellWidth: 80 },
+        9: { cellWidth: 55, halign: 'center' },
+        10: { cellWidth: 55 },
       },
       didDrawPage: () => {
         const h = doc.internal.pageSize.getHeight();
@@ -280,7 +301,7 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="admin-page">
+    <div className="admin-page" translate="no">
       <div className="container">
         <div className="admin-header">
           <div className="admin-header-title">
@@ -299,15 +320,25 @@ function AdminDashboard() {
         </div>
 
         <div className="admin-stats-row">
-          <div className="admin-stat-card admin-stat-total">
+          {/* Each card doubles as a category filter for the table below */}
+          <button
+            type="button"
+            className={`admin-stat-card ${category === 'All Categories' ? 'active' : ''}`}
+            onClick={() => setCategory('All Categories')}
+          >
             <span className="admin-stat-value">{rows.length}</span>
             <span className="admin-stat-label">Total in range</span>
-          </div>
+          </button>
           {CATEGORIES.slice(1).map((c) => (
-            <div className={`admin-stat-card ${CATEGORY_BADGE_CLASS[c]}`} key={c}>
+            <button
+              type="button"
+              className={`admin-stat-card ${CATEGORY_BADGE_CLASS[c]} ${category === c ? 'active' : ''}`}
+              key={c}
+              onClick={() => setCategory(c)}
+            >
               <span className="admin-stat-value">{stats[c]}</span>
               <span className="admin-stat-label">{c}</span>
-            </div>
+            </button>
           ))}
         </div>
 
@@ -355,6 +386,17 @@ function AdminDashboard() {
               ))}
             </select>
 
+            <select
+              className="admin-category-select"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              aria-label="Filter by website"
+            >
+              {WEBSITES.map((w) => (
+                <option key={w.key} value={w.key}>{w.label}</option>
+              ))}
+            </select>
+
             <button
               type="button"
               className="admin-export-btn"
@@ -383,12 +425,14 @@ function AdminDashboard() {
             <table className="admin-table">
               <thead>
                 <tr>
+                  <th>S.No</th>
                   <th>Date</th>
                   <th>Time</th>
                   <th>Name</th>
                   <th>Phone</th>
                   <th>Email</th>
                   <th>Source</th>
+                  <th>Website</th>
                   <th>Category</th>
                   <th>Program</th>
                   <th>English Level</th>
@@ -399,15 +443,17 @@ function AdminDashboard() {
               <tbody>
                 {!loading && visibleRows.length === 0 && (
                   <tr>
-                    <td colSpan={11} className="admin-empty">No submissions match.</td>
+                    <td colSpan={13} className="admin-empty">No submissions match.</td>
                   </tr>
                 )}
-                {visibleRows.map((r) => {
+                {visibleRows.map((r, i) => {
                   const created = new Date(r.created_at);
                   const cat = deriveCategory(r.program);
                   const isChatbot = r.source === 'chatbot';
+                  const site = websiteLabel(r.domain);
                   return (
                     <tr key={r.id}>
+                      <td>{i + 1}</td>
                       <td>{created.toLocaleDateString()}</td>
                       <td>{created.toLocaleTimeString()}</td>
                       <td>{[r.salutation, r.first_name, r.last_name].filter(Boolean).join(' ')}</td>
@@ -418,11 +464,19 @@ function AdminDashboard() {
                           {isChatbot ? '🤖 Chatbot' : '🌐 Website'}
                         </span>
                       </td>
+                      <td>
+                        <span
+                          className={`admin-domain-badge ${site === '.in' ? 'dom-in' : site === '.com' ? 'dom-com' : 'dom-other'}`}
+                          title={r.domain || 'Submitted before website tracking was added'}
+                        >
+                          {site}
+                        </span>
+                      </td>
                       <td><span className={`admin-cat-badge ${CATEGORY_BADGE_CLASS[cat]}`}>{cat}</span></td>
-                      <td>{r.program || '—'}</td>
-                      <td>{r.english_level || '—'}</td>
-                      <td>{r.nationality || '—'}</td>
-                      <td>{r.residence || '—'}</td>
+                      <td>{r.program || 'N/A'}</td>
+                      <td>{r.english_level || 'N/A'}</td>
+                      <td>{r.nationality || 'N/A'}</td>
+                      <td>{r.residence || 'N/A'}</td>
                     </tr>
                   );
                 })}

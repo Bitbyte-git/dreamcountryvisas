@@ -10,17 +10,9 @@
     <meta name="google-site-verification" content="jrGuD9HmN1rb0fxPcW29pCJU7Ajph8PAD5Rn-BjB2TI" />
 
     <!-- Google Analytics 4 — separate measurement ID per domain so .com and
-         .in traffic are tracked as distinct properties -->
+         .in traffic are tracked as distinct properties (config in public/ga.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-JY46359QXW"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      var GA4_MEASUREMENT_ID = window.location.hostname.includes('dreamcountryvisas.in')
-        ? 'G-FN5CRWVL9L'
-        : 'G-JY46359QXW';
-      gtag('config', GA4_MEASUREMENT_ID);
-    </script>
+    <script src="/ga.js"></script>
     <meta
       name="description"
       content="Dream Country Visas — Residency, Citizenship and Real Estate Investment solutions across 50+ countries."

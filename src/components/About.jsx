@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Icon } from '../components/Icons.jsx';
 import { ABOUT_TEAM, ABOUT_FAQ_ITEMS } from '../data.js';
 import FAQ from '../components/FAQ.jsx';
+import { useT } from '../i18n/useT.js';
 
 const PILLARS = [
   {
@@ -53,8 +54,11 @@ const ABOUT_STATS = [
 
 
 function TypewriterTagline() {
-  const firstText = 'Your Aspiration Is';
-  const secondText = 'Our Ambition';
+  // Typed letter by letter, so it's translated here as whole phrases
+  // (the <h2> is translate="no" so the DOM pass leaves the fragments alone).
+  const t = useT();
+  const firstText = t('Your Aspiration Is');
+  const secondText = t('Our Ambition');
 
   const [firstTyped, setFirstTyped] = useState('');
   const [secondTyped, setSecondTyped] = useState('');
@@ -135,7 +139,7 @@ function TypewriterTagline() {
   }, [firstTyped, secondTyped, phase]);
 
   return (
-    <h2 className="tagline-text">
+    <h2 className="tagline-text" translate="no">
       <span className="tagline-navy">
         {firstTyped}
 

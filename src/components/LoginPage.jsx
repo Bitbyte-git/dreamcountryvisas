@@ -43,7 +43,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="login-page">
+    <div className="login-page" translate="no">
       <div className="login-brand-panel">
         <div className="login-brand-glow" />
         <div className="login-brand-mark">

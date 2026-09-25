@@ -340,23 +340,31 @@ export const STATS = [
   { icon: 'star', value: '100+', label: 'Client Reviews' },
 ];
 
-// Images: client-rahul.jpg, client-priya.jpg, client-arjun.jpg, client-neha.jpg
+// Images: client-rahul.jpg, client-vishal.jpg, client-priyanka.jpg, client-harwinder.jpg
 export const TESTIMONIALS = [
   {
     text: 'Most important thing about this organisation is: You are not treated as a client, but you are treated as a family member. That says it all. Utmost care and professionalism are the hallmarks of leadership under Usha mam. Team is available whenever you need their assistance. Thank you for your help.',
     name: 'Rahul Mehta',
+    image: '/landing-img/client-rahul.jpg',
+    imagePosition: 'center 15%',
   },
   {
     text: 'I had got my Canadian Visa application done from DreamCountry Visas Pvt. Ltd. I have found DreamCountry Visas Pvt. Ltd to be very responsive and flexible to my needs. DreamCountry Visas Pvt. Ltd helped me get through with my application without any worries, they followed up with me.',
     name: 'Vishal Hawa',
+    image: '/landing-img/client-vishal.jpg',
+    imagePosition: 'center 15%',
   },
   {
     text: 'My experience with Dream Visas has been exemplary. My heart felt gratitude goes especially to Usha who made sure that I reach Canada safe and quick. At the very beginning it was just a casual enquiry call that I made to her and within a years time we have become more like family. She stood by me during Covid and guided me to steer through difficult situations that came our way. She is smart and quick with action and the whole credit of me being in Canada goes to Usha. Not just me but my family trusts her too as she has helped many of my family members and friends turn their Canadian Dream into Reality.',
     name: 'Priyanka Bhambra',
+    image: '/landing-img/client-priyanka.jpg',
+    imagePosition: 'center 15%',
   },
   {
     text: 'My experience with Dream Visas has been amazing. Usha\u2019s guidance made my journey to Canada smooth and fast. What started as a casual inquiry turned into a bond like family. She stood by me during COVID, helping me navigate challenges. Thanks to her quick action, I\u2019m in Canada today. My family and friends also trust her for making their Canadian dreams a reality!',
     name: 'Harwinder Singh',
+    image: '/landing-img/client-harwinder.jpg',
+    imagePosition: 'center 10%',
   },
 ];
 

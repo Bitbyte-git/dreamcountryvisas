@@ -13,6 +13,7 @@ import {
 import { Icon } from './Icons.jsx';
 import MegaMenu from './MegaMenu.jsx';
 import ConsultationModal from './ConsultationModal.jsx';
+import LanguageSelector from './LanguageSelector.jsx';
 
 // Map nav label -> mega menu data
 const MENUS = {
@@ -126,6 +127,7 @@ export default function Navbar() {
           <Link to="/contact" className="topbar-link topbar-offices">
             <Icon name="globe" size={13} /> Our Offices
           </Link>
+          <LanguageSelector />
           <Link to="/login" className="topbar-link topbar-login">
             <Icon name="lock" size={13} /> Login
           </Link>
