@@ -141,7 +141,7 @@ export default function Contact() {
     }
 
     setIsSubmitting(true);
-    // Send form data to SendGrid backend API
+    // Send form data to the backend API (saves it and emails it)
     await submitContactForm(form);
     setIsSubmitting(false);
 

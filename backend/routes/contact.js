@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 import dns from 'dns';
 import { pool, schema } from '../db.js';
 import { contactLimiter } from '../middleware/rateLimit.js';
@@ -19,11 +19,70 @@ function escapeHtml(value) {
     .replace(/'/g, '&#39;');
 }
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-const rawTo = process.env.SENDGRID_TO_EMAIL || 'infisq.senthil@gmail.com';
+const rawTo = process.env.MAIL_TO_EMAIL || 'infisq.senthil@gmail.com';
 const TO_EMAILS = rawTo.split(',').map((e) => e.trim()).filter(Boolean);
-const FROM_EMAIL = process.env.SENDGRID_FROM_EMAIL || 'infisq.senthil@gmail.com';
+// Resend only sends from a domain verified in its dashboard. Until one is,
+// its shared test sender works — but only delivers to the Resend account's
+// own email address.
+const FROM_EMAIL = process.env.MAIL_FROM_EMAIL || 'Dream Country Visas <onboarding@resend.dev>';
+
+// Shown in the customer's confirmation email — keep in sync with CONTACT in src/data.js.
+const COMPANY = {
+  phone: '+91 8595968122',
+  phoneLink: 'tel:+918595968122',
+  whatsappLink: 'https://wa.me/918595968122',
+  email: 'consult@dreamcountryvisas.com',
+  hours: 'Mon - Sat: 9:00 AM - 8:00 PM',
+};
+
+// Auto-reply to the person who filled in the form, so they know it arrived.
+function customerConfirmationHtml(safe, siteUrl) {
+  return `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;color:#222">
+      <div style="background:#0A1032;padding:28px 24px;border-radius:12px 12px 0 0;text-align:center">
+        <h1 style="color:#C8A84B;margin:0;font-size:24px;letter-spacing:.5px">Dream Country Visas</h1>
+        <p style="color:rgba(255,255,255,.75);margin:6px 0 0;font-size:13px">Your Trusted Immigration Partner</p>
+      </div>
+      <div style="background:#ffffff;padding:28px 24px;border:1px solid #eee;border-top:none">
+        <p style="font-size:16px;margin:0 0 16px">Dear ${safe.salutation} ${safe.firstName} ${safe.lastName},</p>
+        <p style="font-size:15px;line-height:1.6;margin:0 0 16px">
+          Thank you for contacting <strong>Dream Country Visas</strong>. We have received your enquiry
+          and one of our immigration experts will get in touch with you within <strong>24 hours</strong>.
+        </p>
+
+        <div style="background:#f7f7fb;border-left:4px solid #C8A84B;border-radius:8px;padding:16px 18px;margin:20px 0">
+          <p style="margin:0 0 10px;font-size:13px;color:#777;text-transform:uppercase;letter-spacing:.5px"><strong>Your enquiry</strong></p>
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <tr><td style="padding:4px 0;color:#555;width:40%">Program</td><td style="padding:4px 0"><strong>${safe.program}</strong></td></tr>
+            <tr><td style="padding:4px 0;color:#555">Phone</td><td style="padding:4px 0">${safe.phoneCode} ${safe.phone}</td></tr>
+            <tr><td style="padding:4px 0;color:#555">Email</td><td style="padding:4px 0">${safe.email}</td></tr>
+          </table>
+        </div>
+
+        <p style="font-size:15px;line-height:1.6;margin:0 0 20px">
+          Need to speak with us sooner? Reach us directly:
+        </p>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:24px">
+          <tr><td style="padding:5px 0">📞 <a href="${COMPANY.phoneLink}" style="color:#0A1032;text-decoration:none"><strong>${COMPANY.phone}</strong></a></td></tr>
+          <tr><td style="padding:5px 0">💬 <a href="${COMPANY.whatsappLink}" style="color:#0A1032;text-decoration:none"><strong>Chat on WhatsApp</strong></a></td></tr>
+          <tr><td style="padding:5px 0">✉️ <a href="mailto:${COMPANY.email}" style="color:#0A1032;text-decoration:none"><strong>${COMPANY.email}</strong></a></td></tr>
+          <tr><td style="padding:5px 0;color:#555">🕘 ${COMPANY.hours}</td></tr>
+        </table>
+
+        <p style="font-size:15px;margin:0">Warm regards,<br><strong>Team Dream Country Visas</strong></p>
+      </div>
+      <div style="background:#0A1032;padding:16px 24px;border-radius:0 0 12px 12px;text-align:center">
+        <a href="${siteUrl}" style="color:#C8A84B;font-size:13px;text-decoration:none">${siteUrl.replace(/^https?:\/\//, '')}</a>
+        <p style="color:rgba(255,255,255,.55);font-size:11px;margin:8px 0 0;line-height:1.5">
+          You received this email because you submitted an enquiry on our website.
+          If this wasn't you, please ignore this message.
+        </p>
+      </div>
+    </div>
+  `;
+}
 
 // The site the form was filled on — both domains run this same app, so the
 // browser's Origin header (always sent on the form's POST) tells them apart.
@@ -202,26 +261,44 @@ router.post('/', contactLimiter, async (req, res) => {
     `;
 
     // Strip any CR/LF from subject fields — defense in depth against
-    // email-header injection via the API even though SendGrid's API
+    // email-header injection via the API even though Resend's API
     // (not raw SMTP) already isn't vulnerable to it in the usual way.
     const stripNewlines = (v) => String(v ?? '').replace(/[\r\n]+/g, ' ');
 
     const msg = {
-      to: TO_EMAILS.length === 1 ? TO_EMAILS[0] : TO_EMAILS,
+      to: TO_EMAILS,
       from: FROM_EMAIL,
       replyTo: stripNewlines(d.email),
       subject: `New Enquiry – ${stripNewlines(d.salutation)} ${stripNewlines(d.firstName)} ${stripNewlines(d.lastName)} | ${stripNewlines(d.program) || 'General'}${domain ? ` [${stripNewlines(domain)}]` : ''}`,
       html,
     };
 
-    await sgMail.send(msg);
+    // Resend returns API failures as { error } instead of throwing.
+    const { error } = await resend.emails.send(msg);
+    if (error) throw new Error(error.message);
     console.log(`✅ Saved + emailed enquiry for ${d.firstName} ${d.lastName} <${d.email}>`);
+
+    // The enquiry is already saved and sent to the team, so a failed
+    // confirmation must not turn the customer's submission into an error.
+    const siteUrl = `https://${domain && domain.startsWith('dreamcountryvisas.') ? domain : 'dreamcountryvisas.com'}`;
+    try {
+      const confirmation = await resend.emails.send({
+        to: [stripNewlines(d.email)],
+        from: FROM_EMAIL,
+        replyTo: COMPANY.email,
+        subject: 'Thank you for contacting Dream Country Visas',
+        html: customerConfirmationHtml(safe, siteUrl),
+      });
+      if (confirmation.error) throw new Error(confirmation.error.message);
+    } catch (confirmErr) {
+      console.warn(`⚠️ Confirmation email to ${d.email} failed: ${confirmErr.message}`);
+    }
+
     res.json({ ok: true });
 
   } catch (err) {
-    const detail = err?.response?.body?.errors?.[0]?.message || err.message;
-    console.error('❌ Contact submission error:', detail);
-    res.status(500).json({ ok: false, error: detail });
+    console.error('❌ Contact submission error:', err.message);
+    res.status(500).json({ ok: false, error: err.message });
   }
 });
 
