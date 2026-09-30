@@ -15,6 +15,9 @@ export default defineConfig({
         target: 'http://localhost:3001',
         changeOrigin: true,
       },
+      // Served by the backend (per-domain), not from public/.
+      '/robots.txt': 'http://localhost:3001',
+      '/sitemap.xml': 'http://localhost:3001',
     },
   },
 });

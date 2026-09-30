@@ -8,6 +8,7 @@ import 'dotenv/config'; // load .env from project root (process cwd) — must ru
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -76,6 +77,24 @@ app.use('/api/auth', corsMiddleware, authRoutes);
 app.use('/api/admin', corsMiddleware, adminRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
+
+// robots.txt and sitemap.xml are written for .com; when the request comes in
+// on dreamcountryvisas.in, serve the same files with .in URLs so each domain
+// advertises its own sitemap. They live in backend/seo/ rather than public/
+// because Hostinger serves any file present in dist/ directly, without ever
+// reaching this server.
+const seoPath = path.join(__dirname, 'seo');
+const isInDomain = (req) => /(^|\.)dreamcountryvisas\.in$/i.test(req.hostname || '');
+const toInDomain = (text) => text.replace(/https:\/\/dreamcountryvisas\.com/g, 'https://dreamcountryvisas.in');
+
+for (const [file, type] of [['robots.txt', 'text/plain'], ['sitemap.xml', 'application/xml']]) {
+  app.get(`/${file}`, (req, res, next) => {
+    fs.readFile(path.join(seoPath, file), 'utf8', (err, text) => {
+      if (err) return next(err);
+      res.type(type).send(isInDomain(req) ? toInDomain(text) : text);
+    });
+  });
+}
 
 // Serve the built frontend (dist/) and fall back to index.html for
 // React Router routes, without swallowing unmatched /api/* requests.

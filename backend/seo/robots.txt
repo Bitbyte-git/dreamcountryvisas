@@ -3,4 +3,4 @@ Allow: /
 Disallow: /login
 Disallow: /admin
 
-Sitemap: https://dreamcountryvisas.com/sitemap.xml
+Sitemap: https://dreamcountryvisas.com/sitemap.xml  
