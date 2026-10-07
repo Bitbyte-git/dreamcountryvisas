@@ -30,6 +30,7 @@ import LoginPage from './components/LoginPage.jsx';
 import AdminPanel from './components/AdminPanel.jsx';
 import AdminNavbar from './components/AdminNavbar.jsx';
 import ChatBot from './components/ChatBot.jsx';
+import PassportIndexPage from './components/PassportIndexPage.jsx';
 import SEO_DATA from './seoData.js';
 
 const CANONICAL_ORIGIN = 'https://dreamcountryvisas.com';
@@ -64,6 +65,8 @@ const STATIC_PAGE_TITLES = {
   '/licenses': 'Licenses & Accreditations',
   '/license': 'Licenses & Accreditations',
   '/contact': 'Contact Us',
+  '/passport-index': 'Passport Power Rank & Mobility Index',
+  '/passports': 'Passport Power Rank & Mobility Index',
   '/login': 'Admin Login',
   '/admin': 'Admin Dashboard',
 };
@@ -210,6 +213,8 @@ export default function App() {
           <Route path="/licenses" element={<LicensePage />} />
           <Route path="/license" element={<LicensePage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/passport-index" element={<PassportIndexPage />} />
+          <Route path="/passports" element={<PassportIndexPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/admin" element={<AdminPanel />} />
         </Routes>

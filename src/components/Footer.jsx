@@ -23,6 +23,9 @@ export default function Footer() {
         <div className="footer-brand">
           <img src="/landing-img/DC-log.webp" alt="Dream Country Visas" />
           <p className="footer-about-text">{FOOTER.about}</p>
+          <Link to="/passport-index" className="footer-passport-cta-btn">
+            <Icon name="passport" size={15} /> <span>Passport Power Rank</span>
+          </Link>
           <div className="footer-socials">
             <a href="https://www.linkedin.com/company/31293454/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Icon name="linkedin" size={15} /></a>
             <a href="#" aria-label="Facebook"><Icon name="facebook" size={15} /></a>
@@ -65,6 +68,11 @@ export default function Footer() {
                     <Link to={item.link}>{item.name}</Link>
                   </li>
                 ))}
+                <li className="footer-passport-item">
+                  <Link to="/passport-index" className="footer-passport-link">
+                    Passport Power Index
+                  </Link>
+                </li>
                 <li className="footer-licenses-item">
                   <Link to="/licenses" className="footer-licenses-link">
                     Licenses &amp; Accreditations

@@ -124,6 +124,11 @@ export default function Navbar() {
           <a href={`tel:${CONTACT.phone.replace(/\s+/g, '')}`} className="topbar-link">
             <Icon name="phone" size={13} /> {CONTACT.phone}
           </a>
+          <Link to="/passport-index" className="topbar-link topbar-passport-cta" title="Global Passport Power Rank 2026">
+            <span className="topbar-passport-pill">
+              <Icon name="passport" size={13} /> Passport Index
+            </span>
+          </Link>
           <Link to="/contact" className="topbar-link topbar-offices">
             <Icon name="globe" size={13} /> Our Offices
           </Link>
@@ -179,6 +184,18 @@ export default function Navbar() {
 
         {/* Mobile — combined hamburger panel (left + right items together) */}
         <nav className={`nav-links-mobile ${open ? 'open' : ''}`}>
+          <div className="nav-item mobile-passport-menu-item">
+            <Link
+              to="/passport-index"
+              onClick={closeMenus}
+              className="mobile-passport-menu-link"
+            >
+              <span className="mobile-passport-title">
+                <Icon name="passport" size={17} /> Passport Power Index
+              </span>
+              <span className="mobile-passport-badge">Rank 2026</span>
+            </Link>
+          </div>
           {renderLinks([...NAV_LINKS_LEFT, ...NAV_LINKS_RIGHT])}
         </nav>
 

@@ -34,6 +34,18 @@ const SEO_DATA = {
       "View Dream Country Visas' professional registrations, licenses and credentials supporting our immigration and global mobility advisory services.",
     keywords: 'Immigration Consultant License, Immigration Consultant Credentials, Immigration Registration',
   },
+  '/passport-index': {
+    title: 'Global Passport Power Rank 2026 | Dream Country Visas',
+    description:
+      'Explore official passport power ranks, visa-free mobility scores and government citizenship & residency programs offered by Dream Country Visas.',
+    keywords: 'Passport Index, Passport Power Rank, Citizenship by Investment, Visa-Free Travel, Global Mobility Score',
+  },
+  '/passports': {
+    title: 'Global Passport Power Rank 2026 | Dream Country Visas',
+    description:
+      'Explore official passport power ranks, visa-free mobility scores and government citizenship & residency programs offered by Dream Country Visas.',
+    keywords: 'Passport Index, Passport Power Rank, Citizenship by Investment, Visa-Free Travel, Global Mobility Score',
+  },
   '/citizenship': {
     title: 'Citizenship by Investment Programs | Dream Country Visas',
     description:
