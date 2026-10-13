@@ -10,6 +10,7 @@ import About from './components/About.jsx';
 import Testimonials from './components/Testimonials.jsx';
 import Team from './components/Team.jsx';
 import FAQ from './components/FAQ.jsx';
+import ReviewsSection from './components/ReviewsSection.jsx';
 import Contact from './components/Contact.jsx';
 import Footer from './components/Footer.jsx';
 import CountryPage from './Citizenship/CitizenshipPage.jsx';
@@ -179,8 +180,9 @@ function Home() {
       <Properties />
       <SuccessStory />
       <Testimonials />
-            <Team />
-            <FAQ />
+      <Team />
+      <ReviewsSection country="all" countryName="Dream Country Visas" />
+      <FAQ />
       <Contact />
       <ConsultationModal
         open={showAutoPopup}

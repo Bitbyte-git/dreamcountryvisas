@@ -71,7 +71,15 @@ export default function CitizenshipOverview() {
               <div className="ov-card-media">
                 <img src={c.banner} alt={c.name} loading="lazy" decoding="async" />
                 <span className="ov-card-badge">
-                  {slug === 'malta' ? '⭐ EU Passport' : slug === 'vanuatu' ? '⚡ 2-3 Months Fast' : '⭐ Direct CBI'}
+                  {slug === 'malta'
+                    ? '⭐ EU Citizenship by Merit'
+                    : slug === 'vanuatu'
+                    ? '⚡ 2-3 Months Fast'
+                    : slug === 'grenada'
+                    ? '⭐ USA E-2 Treaty'
+                    : slug === 'argentina'
+                    ? '⚡ 2 Years Fast-Track'
+                    : '⭐ Direct CBI'}
                 </span>
                 <span className="ov-card-price-pill">{c.price}</span>
               </div>

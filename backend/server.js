@@ -16,6 +16,7 @@ import './db.js';
 import contactRoutes from './routes/contact.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import reviewsRoutes from './routes/reviews.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.join(__dirname, '..', 'dist');
@@ -75,6 +76,7 @@ const corsMiddleware = cors({
 app.use('/api/contact', corsMiddleware, contactRoutes);
 app.use('/api/auth', corsMiddleware, authRoutes);
 app.use('/api/admin', corsMiddleware, adminRoutes);
+app.use('/api/reviews', corsMiddleware, reviewsRoutes);
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 

@@ -51,50 +51,79 @@ function isDummyPhoneNumber(digits) {
   return false;
 }
 
+export const COUNTRY_PHONE_SPECS = {
+  '+91': { min: 10, max: 10, label: '10 digits (India)', placeholder: 'e.g. 98765 43210 (10 digits)' },
+  '+1': { min: 10, max: 10, label: '10 digits (US/Canada)', placeholder: 'e.g. 202 555 0199 (10 digits)' },
+  '+971': { min: 9, max: 9, label: '9 digits (UAE)', placeholder: 'e.g. 50 123 4567 (9 digits)' },
+  '+44': { min: 10, max: 13, label: '10-13 digits (UK)', placeholder: 'e.g. 7911 123456 (10-13 digits)' },
+  '+61': { min: 9, max: 9, label: '9 digits (Australia)', placeholder: 'e.g. 412 345 678 (9 digits)' },
+  '+49': { min: 10, max: 12, label: '10-12 digits (Germany)', placeholder: 'e.g. 151 23456789 (10-12 digits)' },
+  '+81': { min: 10, max: 11, label: '10-11 digits (Japan)', placeholder: 'e.g. 90 1234 5678 (10-11 digits)' },
+  '+64': { min: 8, max: 10, label: '8-10 digits (New Zealand)', placeholder: 'e.g. 21 123 4567 (8-10 digits)' },
+  '+27': { min: 9, max: 10, label: '9-10 digits (South Africa)', placeholder: 'e.g. 82 123 4567 (9-10 digits)' },
+  '+65': { min: 8, max: 8, label: '8 digits (Singapore)', placeholder: 'e.g. 8123 4567 (8 digits)' },
+  '+60': { min: 9, max: 10, label: '9-10 digits (Malaysia)', placeholder: 'e.g. 12 345 6789' },
+  '+966': { min: 9, max: 9, label: '9 digits (Saudi Arabia)', placeholder: 'e.g. 50 123 4567' },
+  '+974': { min: 8, max: 8, label: '8 digits (Qatar)', placeholder: 'e.g. 3312 3456' },
+  '+33': { min: 9, max: 9, label: '9 digits (France)', placeholder: 'e.g. 6 12 34 56 78' },
+  '+39': { min: 9, max: 10, label: '9-10 digits (Italy)', placeholder: 'e.g. 312 345 6789' },
+  '+34': { min: 9, max: 9, label: '9 digits (Spain)', placeholder: 'e.g. 612 345 678' },
+  '+351': { min: 9, max: 9, label: '9 digits (Portugal)', placeholder: 'e.g. 912 345 678' },
+  '+30': { min: 10, max: 10, label: '10 digits (Greece)', placeholder: 'e.g. 691 234 5678' },
+  '+357': { min: 8, max: 8, label: '8 digits (Cyprus)', placeholder: 'e.g. 96 123456' },
+  '+356': { min: 8, max: 8, label: '8 digits (Malta)', placeholder: 'e.g. 7912 3456' },
+  '+90': { min: 10, max: 10, label: '10 digits (Turkey)', placeholder: 'e.g. 532 123 4567' },
+  '+86': { min: 11, max: 11, label: '11 digits (China)', placeholder: 'e.g. 138 1234 5678' },
+};
+
+export function getPhoneSpecForCode(phoneCode) {
+  const code = String(phoneCode || '+91').trim();
+  return (
+    COUNTRY_PHONE_SPECS[code] || {
+      min: 7,
+      max: 13,
+      label: '7-13 digits',
+      placeholder: 'e.g. 9876543210',
+    }
+  );
+}
+
 /**
- * Validates a telephone number with country-specific rules:
- * - India (+91): Strictly 10 digits starting with 6, 7, 8, or 9
- * - US/Canada (+1): Strictly 10 digits starting with 2-9
- * - UAE (+971): 9 digits (mobile 5x xxx xxxx)
- * - UK (+44): 10 or 11 digits
- * - Australia (+61): 9 digits
- * - General: 8 to 12 digits, no dummy repeat patterns
+ * Returns specific validation error message if phone is invalid.
+ */
+export function getPhoneValidationError(phone, phoneCode = '+91') {
+  if (!phone || !String(phone).trim()) {
+    return 'Please enter your mobile phone number.';
+  }
+  const digits = String(phone).replace(/\D/g, '');
+  if (!digits) {
+    return 'Please enter numbers only for your mobile phone.';
+  }
+  if (isDummyPhoneNumber(digits)) {
+    return 'Please enter a genuine, non-repeating phone number.';
+  }
+  const spec = getPhoneSpecForCode(phoneCode);
+  if (digits.length < spec.min) {
+    return `Phone number for ${phoneCode} requires at least ${spec.min} digits. (Entered ${digits.length})`;
+  }
+  if (digits.length > spec.max) {
+    return `Phone number for ${phoneCode} cannot exceed ${spec.max} digits. (Entered ${digits.length})`;
+  }
+  const code = String(phoneCode).trim();
+  if (code === '+91' && !/^[6-9]\d{9}$/.test(digits)) {
+    return 'Valid Indian mobile numbers must be 10 digits starting with 6, 7, 8, or 9.';
+  }
+  if (code === '+1' && !/^[2-9]\d{9}$/.test(digits)) {
+    return 'Valid US/Canadian numbers must be 10 digits starting with 2-9.';
+  }
+  return '';
+}
+
+/**
+ * Validates a telephone number with country-specific rules
  */
 export function isValidPhone(phone, phoneCode = '+91') {
-  if (!phone) return false;
-  const digits = String(phone).replace(/\D/g, '');
-
-  if (isDummyPhoneNumber(digits)) return false;
-
-  const code = String(phoneCode).trim();
-
-  if (code === '+91') {
-    // India mobile: exactly 10 digits starting with 6, 7, 8, or 9
-    return /^[6-9]\d{9}$/.test(digits);
-  }
-
-  if (code === '+1') {
-    // US / Canada: exactly 10 digits, area code and exchange starts with 2-9
-    return /^[2-9]\d{2}[2-9]\d{6}$/.test(digits);
-  }
-
-  if (code === '+971') {
-    // UAE: 9 digits
-    return /^[2-9]\d{8}$/.test(digits);
-  }
-
-  if (code === '+44') {
-    // UK: 10 or 11 digits
-    return /^[1-9]\d{9,10}$/.test(digits);
-  }
-
-  if (code === '+61') {
-    // Australia: 9 digits
-    return /^[2-9]\d{8}$/.test(digits);
-  }
-
-  // General international fallback
-  return digits.length >= 8 && digits.length <= 13;
+  return getPhoneValidationError(phone, phoneCode) === '';
 }
 
 /**
@@ -112,10 +141,12 @@ export function isValidEmail(email) {
 }
 
 /**
- * Sanitizes phone input in real time to only allow digits, spaces, and dashes.
+ * Sanitizes phone input in real time to only allow digits up to country max digits.
  */
-export function sanitizePhoneInput(val) {
-  return val.replace(/[^\d\s-]/g, '');
+export function sanitizePhoneInput(val, phoneCode = '+91') {
+  const digits = String(val || '').replace(/\D/g, '');
+  const spec = getPhoneSpecForCode(phoneCode);
+  return digits.slice(0, spec.max);
 }
 
 /**
@@ -147,8 +178,11 @@ export function validateForm(form, needsEnglishLevel = false) {
 
   if (!form.phone || !form.phone.trim()) {
     errors.phone = 'Please enter your phone number.';
-  } else if (!isValidPhone(form.phone, form.phoneCode)) {
-    errors.phone = 'Please enter a valid phone number.';
+  } else {
+    const phoneErr = getPhoneValidationError(form.phone, form.phoneCode);
+    if (phoneErr) {
+      errors.phone = phoneErr;
+    }
   }
 
   if (!form.email || !form.email.trim()) {

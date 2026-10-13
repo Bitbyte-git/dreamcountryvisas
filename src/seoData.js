@@ -39,12 +39,16 @@ const SEO_DATA = {
     description:
       'Explore official passport power ranks, visa-free mobility scores and government citizenship & residency programs offered by Dream Country Visas.',
     keywords: 'Passport Index, Passport Power Rank, Citizenship by Investment, Visa-Free Travel, Global Mobility Score',
+    urlCom: 'https://dreamcountryvisas.com/passport-index',
+    urlIn: 'https://dreamcountryvisas.in/passport-index',
   },
   '/passports': {
     title: 'Global Passport Power Rank 2026 | Dream Country Visas',
     description:
       'Explore official passport power ranks, visa-free mobility scores and government citizenship & residency programs offered by Dream Country Visas.',
     keywords: 'Passport Index, Passport Power Rank, Citizenship by Investment, Visa-Free Travel, Global Mobility Score',
+    urlCom: 'https://dreamcountryvisas.com/passport-index',
+    urlIn: 'https://dreamcountryvisas.in/passport-index',
   },
   '/citizenship': {
     title: 'Citizenship by Investment Programs | Dream Country Visas',
@@ -66,10 +70,12 @@ const SEO_DATA = {
     keywords: 'St Kitts & Nevis Citizenship by Investment, St Kitts Citizenship, St Kitts CBI',
   },
   '/citizenship/malta': {
-    title: 'Malta Citizenship & Investment Options | Dream Country Visas',
+    title: 'Malta Citizenship by Merit (MCBM) 2025 | Dream Country Visas',
     description:
-      'Explore current Malta citizenship and residence pathways, eligibility and applicable requirements with guidance from global mobility advisors.',
-    keywords: 'Malta Citizenship, Malta Immigration, Malta Residency',
+      'Explore Malta Citizenship by Merit under Legal Notice 159 of 2025. Merit-based naturalization for strategic national contributions, requirements, timelines, and benefits.',
+    keywords: 'Malta Citizenship by Merit, MCBM, Malta Citizenship, Malta LN 159 2025, Malta Second Passport',
+    urlCom: 'https://dreamcountryvisas.com/citizenship/malta',
+    urlIn: 'https://dreamcountryvisas.in/citizenship/malta',
   },
   '/citizenship/vanuatu': {
     title: 'Vanuatu Citizenship by Investment | Dream Country Visas',
@@ -82,6 +88,22 @@ const SEO_DATA = {
     description:
       'Explore Nauru citizenship by investment, eligibility, contribution requirements and application process with guidance from global mobility advisors.',
     keywords: 'Nauru Citizenship by Investment, Nauru CBI, Nauru Investment Immigration',
+  },
+  '/citizenship/grenada': {
+    title: 'Grenada Citizenship by Investment & USA E-2 Treaty | Dream Country Visas',
+    description:
+      'Explore Grenada citizenship by investment, USA E-2 investor visa treaty benefits, investment routes, family eligibility and processing timelines.',
+    keywords: 'Grenada Citizenship by Investment, Grenada CBI, Grenada USA E-2 Visa, Grenada Passport',
+    urlCom: 'https://dreamcountryvisas.com/citizenship/grenada',
+    urlIn: 'https://dreamcountryvisas.in/citizenship/grenada',
+  },
+  '/citizenship/argentina': {
+    title: 'Argentina Citizenship by Investment & Fast-Track Residency | Dream Country Visas',
+    description:
+      'Explore Argentina investor residency and fast-track 2-year citizenship naturalization pathway under Law 346, benefits and eligibility requirements.',
+    keywords: 'Argentina Citizenship by Investment, Argentina Investor Visa, Argentina Passport, Argentina Second Citizenship',
+    urlCom: 'https://dreamcountryvisas.com/citizenship/argentina',
+    urlIn: 'https://dreamcountryvisas.in/citizenship/argentina',
   },
   '/residency': {
     title: 'Residency by Investment Programs | Dream Country Visas',

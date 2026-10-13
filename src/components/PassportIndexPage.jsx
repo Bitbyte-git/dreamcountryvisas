@@ -3,15 +3,19 @@ import { Link } from 'react-router-dom';
 import { DC_PASSPORTS, PASSPORT_STATS_SUMMARY } from '../passportData.js';
 import ConsultationModal from './ConsultationModal.jsx';
 
+export const PASSPORT_INDEX_URLS = {
+  com: 'https://dreamcountryvisas.com/passport-index',
+  in: 'https://dreamcountryvisas.in/passport-index',
+};
+
 export default function PassportIndexPage() {
   const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all'); // all | citizenship | residency | pr | work
+  const [selectedCategory, setSelectedCategory] = useState('all'); // all | citizenship | residency | realestate | pr | work
+  const [selectedCountry, setSelectedCountry] = useState('all');
   const [selectedRegion, setSelectedRegion] = useState('all');
   const [sortBy, setSortBy] = useState('rank'); // rank | ms | visafree
   const [showConsultation, setShowConsultation] = useState(false);
   const [selectedCountryForModal, setSelectedCountryForModal] = useState('');
-  const [compareList, setCompareList] = useState([]);
-  const [showCompareModal, setShowCompareModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -22,7 +26,13 @@ export default function PassportIndexPage() {
     let list = [...DC_PASSPORTS];
 
     if (selectedCategory !== 'all') {
-      list = list.filter((p) => p.category === selectedCategory);
+      list = list.filter((p) =>
+        p.categories ? p.categories.includes(selectedCategory) : p.category === selectedCategory
+      );
+    }
+
+    if (selectedCountry !== 'all') {
+      list = list.filter((p) => p.id === selectedCountry);
     }
 
     if (selectedRegion !== 'all') {
@@ -50,29 +60,12 @@ export default function PassportIndexPage() {
     }
 
     return list;
-  }, [selectedCategory, selectedRegion, search, sortBy]);
-
-  const toggleCompare = (passportId) => {
-    setCompareList((prev) => {
-      if (prev.includes(passportId)) {
-        return prev.filter((id) => id !== passportId);
-      }
-      if (prev.length >= 3) {
-        alert('You can compare up to 3 passports simultaneously.');
-        return prev;
-      }
-      return [...prev, passportId];
-    });
-  };
+  }, [selectedCategory, selectedCountry, selectedRegion, search, sortBy]);
 
   const openConsultation = (countryName = '') => {
     setSelectedCountryForModal(countryName);
     setShowConsultation(true);
   };
-
-  const comparedItems = useMemo(() => {
-    return DC_PASSPORTS.filter((p) => compareList.includes(p.id));
-  }, [compareList]);
 
   return (
     <div className="pi-page">
@@ -91,7 +84,7 @@ export default function PassportIndexPage() {
               Global Passport Power Rank 2026
             </span>
             <span className="pi-badge pi-badge-gold">
-              All {PASSPORT_STATS_SUMMARY.totalPrograms} Verified Destinations
+              <span>All Serviced Countries</span> ({PASSPORT_STATS_SUMMARY.totalPrograms})
             </span>
           </div>
 
@@ -148,35 +141,58 @@ export default function PassportIndexPage() {
               className={`pi-tab-btn ${selectedCategory === 'all' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('all')}
             >
-              All Destinations ({DC_PASSPORTS.length})
+              <span>All Destinations</span> <span className="pi-tab-count">({DC_PASSPORTS.length})</span>
             </button>
             <button
               className={`pi-tab-btn ${selectedCategory === 'citizenship' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('citizenship')}
             >
-              Citizenship (CBI) (5)
+              <span>Citizenship (CBI)</span> <span className="pi-tab-count">({DC_PASSPORTS.filter((p) => (p.categories ? p.categories.includes('citizenship') : p.category === 'citizenship')).length})</span>
             </button>
             <button
               className={`pi-tab-btn ${selectedCategory === 'residency' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('residency')}
             >
-              Residency &amp; Golden Visa (8)
+              <span>Residency &amp; Golden Visa</span> <span className="pi-tab-count">({DC_PASSPORTS.filter((p) => (p.categories ? p.categories.includes('residency') : p.category === 'residency')).length})</span>
+            </button>
+            <button
+              className={`pi-tab-btn ${selectedCategory === 'realestate' ? 'active' : ''}`}
+              onClick={() => setSelectedCategory('realestate')}
+            >
+              <span>Real Estate Investment</span> <span className="pi-tab-count">({DC_PASSPORTS.filter((p) => (p.categories ? p.categories.includes('realestate') : p.category === 'realestate')).length})</span>
             </button>
             <button
               className={`pi-tab-btn ${selectedCategory === 'pr' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('pr')}
             >
-              Permanent Residency (PR) (2)
+              <span>Permanent Residency (PR)</span> <span className="pi-tab-count">({DC_PASSPORTS.filter((p) => (p.categories ? p.categories.includes('pr') : p.category === 'pr')).length})</span>
             </button>
             <button
               className={`pi-tab-btn ${selectedCategory === 'work' ? 'active' : ''}`}
               onClick={() => setSelectedCategory('work')}
             >
-              Work &amp; Skilled Migration (5)
+              <span>Work &amp; Business Visas</span> <span className="pi-tab-count">({DC_PASSPORTS.filter((p) => (p.categories ? p.categories.includes('work') : p.category === 'work')).length})</span>
             </button>
           </div>
 
           <div className="pi-filter-row-secondary">
+            <div className="pi-select-wrap">
+              <label>Select Country:</label>
+              <select
+                value={selectedCountry}
+                onChange={(e) => setSelectedCountry(e.target.value)}
+              >
+                <option value="all">All Serviced Countries</option>
+                {[...DC_PASSPORTS]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.flag} {c.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
             <div className="pi-select-wrap">
               <label>Region:</label>
               <select
@@ -201,15 +217,6 @@ export default function PassportIndexPage() {
                 <option value="visafree">Visa-Free Destinations (VF)</option>
               </select>
             </div>
-
-            {compareList.length > 0 && (
-              <button
-                className="pi-compare-launch-btn"
-                onClick={() => setShowCompareModal(true)}
-              >
-                Compare Selected ({compareList.length}/3)
-              </button>
-            )}
           </div>
         </div>
 
@@ -267,11 +274,11 @@ export default function PassportIndexPage() {
           {/* Right Cards List */}
           <div className="pi-list-container">
             <div className="pi-list-header">
-              <span>Showing {filteredPassports.length} Verified Dream Country Visas Destinations</span>
+              <span><span>Showing</span> {filteredPassports.length} <span>Verified Dream Country Visas Destinations</span></span>
               <span className="pi-legend-summary">
-                <span className="legend-vf">■ Visa-Free</span>
-                <span className="legend-voa">■ Visa on Arrival</span>
-                <span className="legend-vr">■ Visa Required</span>
+                <span className="legend-vf">■ <span>Visa-Free</span></span>
+                <span className="legend-voa">■ <span>Visa on Arrival</span></span>
+                <span className="legend-vr">■ <span>Visa Required</span></span>
               </span>
             </div>
 
@@ -284,6 +291,7 @@ export default function PassportIndexPage() {
                   onClick={() => {
                     setSearch('');
                     setSelectedCategory('all');
+                    setSelectedCountry('all');
                     setSelectedRegion('all');
                   }}
                 >
@@ -293,7 +301,6 @@ export default function PassportIndexPage() {
             ) : (
               <div className="pi-cards-grid">
                 {filteredPassports.map((passport) => {
-                  const isCompared = compareList.includes(passport.id);
                   const total = passport.visaFree + passport.visaOnArrival + passport.visaRequired;
                   const vfPct = ((passport.visaFree / total) * 100).toFixed(1);
                   const voaPct = ((passport.visaOnArrival / total) * 100).toFixed(1);
@@ -301,7 +308,7 @@ export default function PassportIndexPage() {
 
                   return (
                     <article className="pi-card" key={passport.id}>
-                      {/* Top Header Block: Passport Cover + Mobility Summary (Balanced height, zero empty gap) */}
+                      {/* Top Header Block: Passport Cover + Mobility Summary */}
                       <div className="pi-card-head-area">
                         <div className="pi-card-visual-col">
                           <div className="pi-passport-wrap">
@@ -316,11 +323,8 @@ export default function PassportIndexPage() {
                               }}
                             />
                             <span className="pi-rank-badge">
-                              RANK #{passport.globalRank}
+                              <span>Rank</span> #{passport.globalRank}
                             </span>
-                          </div>
-                          <div className="pi-passport-subbadge">
-                            <span>{passport.region}</span>
                           </div>
                         </div>
 
@@ -362,22 +366,20 @@ export default function PassportIndexPage() {
 
                             <div className="pi-bar-numbers">
                               <span className="pi-num-vf">
-                                <strong>{passport.visaFree}</strong> Visa-Free
+                                <strong>{passport.visaFree}</strong> <span>Visa-Free</span>
                               </span>
                               <span className="pi-num-voa">
-                                <strong>{passport.visaOnArrival}</strong> Visa on Arrival / eTA
+                                <strong>{passport.visaOnArrival}</strong> <span>Visa on Arrival / eTA</span>
                               </span>
                               <span className="pi-num-vr">
-                                <strong>{passport.visaRequired}</strong> Visa Required
+                                <strong>{passport.visaRequired}</strong> <span>Visa Required</span>
                               </span>
                             </div>
                           </div>
-
-                          <p className="pi-card-summary">{passport.summary}</p>
                         </div>
                       </div>
 
-                      {/* Full Width Structured Data Grid (3 columns across entire card) */}
+                      {/* Full Width Structured Data Grid (3 key decision points) */}
                       <div className="pi-data-grid">
                         {passport.legalData.map((item, idx) => (
                           <div className="pi-data-item" key={idx}>
@@ -402,15 +404,6 @@ export default function PassportIndexPage() {
                         </div>
 
                         <div className="pi-actions-group">
-                          <label className="pi-compare-checkbox">
-                            <input
-                              type="checkbox"
-                              checked={isCompared}
-                              onChange={() => toggleCompare(passport.id)}
-                            />
-                            <span>Compare</span>
-                          </label>
-
                           <Link to={passport.pathwayLink} className="btn pi-explore-btn">
                             Explore Program →
                           </Link>
@@ -431,108 +424,6 @@ export default function PassportIndexPage() {
           </div>
         </div>
       </section>
-
-      {/* Side-by-Side Comparison Modal */}
-      {showCompareModal && (
-        <div className="pi-modal-backdrop" onClick={() => setShowCompareModal(false)}>
-          <div className="pi-compare-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="pi-modal-head">
-              <h2>Side-by-Side Comparison ({comparedItems.length} Passports)</h2>
-              <button className="pi-modal-close" onClick={() => setShowCompareModal(false)}>
-                ×
-              </button>
-            </div>
-
-            <div className="pi-compare-table-wrap">
-              <table className="pi-compare-table">
-                <thead>
-                  <tr>
-                    <th>Immigration Feature</th>
-                    {comparedItems.map((c) => (
-                      <th key={c.id}>
-                        <div className="pi-compare-head-item">
-                          <img src={c.coverImage} alt={c.name} className="pi-compare-thumb" />
-                          <span>{c.flag} {c.name}</span>
-                          <small>Rank #{c.globalRank}</small>
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Mobility Score (MS)</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id} className="pi-highlight-val"><strong>{c.mobilityScore}</strong></td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Visa-Free Destinations</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id}>{c.visaFree} Countries</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Visa on Arrival / eTA</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id}>{c.visaOnArrival} Countries</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Visa Required</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id}>{c.visaRequired} Countries</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Starting Investment</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id} className="pi-gold-text"><strong>{c.price}</strong></td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Processing Time</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id}>{c.time}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Program Category</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id}>{c.categoryLabel}</td>
-                    ))}
-                  </tr>
-                  <tr>
-                    <td><strong>Action</strong></td>
-                    {comparedItems.map((c) => (
-                      <td key={c.id}>
-                        <Link to={c.pathwayLink} className="btn pi-explore-btn btn-sm">
-                          View Details
-                        </Link>
-                      </td>
-                    ))}
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div className="pi-modal-footer">
-              <button className="btn btn-secondary" onClick={() => setCompareList([])}>
-                Clear All
-              </button>
-              <button
-                className="btn btn-gold"
-                onClick={() => {
-                  setShowCompareModal(false);
-                  openConsultation('Comparison Assessment');
-                }}
-              >
-                Book Assessment on Selected
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Consultation Modal */}
       <ConsultationModal

@@ -52,6 +52,33 @@ async function init() {
     )
   `);
 
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      country VARCHAR(50) NOT NULL,
+      program VARCHAR(255),
+      client_name VARCHAR(100) NOT NULL,
+      rating INT NOT NULL DEFAULT 5,
+      review_title VARCHAR(255) NOT NULL,
+      review_text TEXT NOT NULL,
+      verified TINYINT(1) DEFAULT 1,
+      helpful_count INT DEFAULT 0,
+      status VARCHAR(20) DEFAULT 'approved',
+      created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      INDEX idx_country (country),
+      INDEX idx_created_at (created_at)
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS review_rate_limits (
+      phone VARCHAR(40) PRIMARY KEY,
+      ip VARCHAR(60),
+      last_review_at DATETIME NOT NULL,
+      review_count INT NOT NULL DEFAULT 1
+    )
+  `);
+
   await ensureDomainColumn();
 
   console.log(`🗄️  MySQL ready — database "${DB_NAME}" @ ${DB_HOST}:${DB_PORT}`);

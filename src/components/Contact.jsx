@@ -18,6 +18,7 @@ import {
   submitContactForm,
   isValidPhone,
   isValidEmail,
+  getPhoneSpecForCode,
 } from '../utils/formValidation.js';
 
 // Builds the "Program of interest" dropdown from every service category,
@@ -75,7 +76,7 @@ export default function Contact() {
     const { name, value, type, checked } = e.target;
     const finalValue =
       name === 'phone'
-        ? sanitizePhoneInput(value)
+        ? sanitizePhoneInput(value, form.phoneCode)
         : type === 'checkbox'
         ? checked
         : value;
@@ -84,6 +85,9 @@ export default function Contact() {
       const next = { ...prev, [name]: finalValue };
       if (name === 'program' && !PR_PROGRAMS_NEEDING_ENGLISH.includes(finalValue)) {
         next.englishLevel = '';
+      }
+      if (name === 'phoneCode' && prev.phone) {
+        next.phone = sanitizePhoneInput(prev.phone, finalValue);
       }
       return next;
     });
@@ -298,8 +302,10 @@ export default function Contact() {
                 />
                 <input
                   type="tel"
+                  inputMode="numeric"
                   name="phone"
-                  placeholder="81234 56789"
+                  placeholder={getPhoneSpecForCode(form.phoneCode).placeholder}
+                  maxLength={getPhoneSpecForCode(form.phoneCode).max}
                   value={form.phone}
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -377,6 +383,39 @@ export default function Contact() {
           >
             {isSubmitting ? 'Sending Request...' : 'Submit'}
           </button>
+
+          {/* 3 Trust Cards Horizontal under Submit Button */}
+          <div className="contact-form-trust-cards-horizontal">
+            <div className="contact-trust-card-h">
+              <div className="contact-trust-icon-wrap">
+                <Icon name="lock" size={17} />
+              </div>
+              <div className="contact-trust-body">
+                <strong>100% Verified Trust</strong>
+                <span>Direct Legal Advisory &amp; NDA</span>
+              </div>
+            </div>
+
+            <div className="contact-trust-card-h">
+              <div className="contact-trust-icon-wrap">
+                <Icon name="support" size={17} />
+              </div>
+              <div className="contact-trust-body">
+                <strong>Best Dedicated Support</strong>
+                <span>Personal case manager</span>
+              </div>
+            </div>
+
+            <div className="contact-trust-card-h">
+              <div className="contact-trust-icon-wrap">
+                <Icon name="check" size={17} />
+              </div>
+              <div className="contact-trust-body">
+                <strong>Government Certified</strong>
+                <span>Official statutory standards</span>
+              </div>
+            </div>
+          </div>
         </form>
       </div>
 

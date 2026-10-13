@@ -13,9 +13,14 @@ export default function MegaMenu({ data, overviewLink = '/', open = false, onNav
           </Link>
 
           <div className="mega-groups">
-            {groups.map((g) => (
-              <div className="mega-group" key={g.title}>
-                <p className="mega-group-title">{g.title}</p>
+            {groups.map((g, idx) => (
+              <div className="mega-group" key={g.title ? `${g.title}-${idx}` : idx}>
+                <p
+                  className="mega-group-title"
+                  style={g.hideTitle ? { visibility: 'hidden', userSelect: 'none' } : {}}
+                >
+                  {g.title || '\u00A0'}
+                </p>
                                 {g.items.map((c) => {
                   // If the item has a `link`, it navigates to its own page
                   const Tag = c.link ? Link : 'a';

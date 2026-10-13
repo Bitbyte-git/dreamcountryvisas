@@ -422,6 +422,7 @@ export const CITIZENSHIP_MENU = {
       items: [
         { name: 'Antigua & Barbuda', price: 'from $230,000', time: 'from 8 months', image: '/menu/menu-antigua.webp', link: '/citizenship/antigua-barbuda' },
         { name: 'St. Kitts and Nevis', price: 'from $250,000', time: 'from 6 months', image: '/menu/menu-stkitts.webp', link: '/citizenship/st-kitts-nevis' },
+        { name: 'Grenada', price: 'from $235,000', time: 'from 6 months', image: '/menu/menu-grenada.webp', link: '/citizenship/grenada' },
       ],
     },
     {
@@ -429,8 +430,8 @@ export const CITIZENSHIP_MENU = {
       items: [
         {
           name: 'Malta',
-          price: 'from €600,000',
-          time: 'from 12 months',
+          price: 'Strategic Merit Contribution',
+          time: 'from 20+ months',
           image: '/menu/menu-malta.webp',
           link: '/citizenship/malta',
         },
@@ -441,12 +442,25 @@ export const CITIZENSHIP_MENU = {
           image: '/menu/menu-vanuatu.webp',
           link: '/citizenship/vanuatu',
         },
+      ],
+    },
+    {
+      title: 'OTHER',
+      hideTitle: true,
+      items: [
         {
           name: 'Nauru',
           price: 'from $105,000',
           time: 'from 3 months',
           image: '/menu/menu-nauru.webp',
           link: '/citizenship/nauru',
+        },
+        {
+          name: 'Argentina',
+          price: 'from $50,000',
+          time: 'from 2 years',
+          image: '/menu/menu-argentina.webp',
+          link: '/citizenship/argentina',
         },
       ],
     },
@@ -672,24 +686,28 @@ export const CITIZENSHIP_FAQ = {
 
   malta: [
     {
-      q: 'How much does Malta citizenship by investment cost?',
-      a: "The total cost includes a National Development and Social Fund contribution (€600,000 after 36 months' residency, or €750,000 after 12 months), a real estate investment (minimum €700,000 purchase or €16,000/year lease), and a minimum €10,000 charitable donation — plus due diligence and processing fees.",
+      q: 'What is Malta Citizenship by Merit (MCBM)?',
+      a: 'Malta Citizenship by Merit is a discretionary legal framework established in July 2025 through Legal Notice 159 of 2025 under Article 11A(1) of Subsidiary Legislation 188.06. It grants naturalization in recognition of exceptional service, achievement, or contribution deemed of strategic national value to the Republic of Malta and alignment with Malta Vision 2050.',
     },
     {
-      q: 'How long does it take to get Malta citizenship by investment?',
-      a: 'Processing takes 12–36 months depending on the route chosen: the fast-track option (€750,000) takes roughly 14–16 months total, while the standard route (€600,000) takes about 38–40 months.',
+      q: 'Is there a fixed minimum investment for Malta Citizenship by Merit?',
+      a: 'No defined minimum investment threshold applies. The framework is non-transactional: passive investments like real estate or bonds alone are not sufficient. The statutory requirement is an exceptional contribution or service deemed of strategic national importance, assessed individually on merit and credibility by the Aġenzija Komunità Malta Evaluation Board.',
     },
     {
-      q: "What's the difference between Malta Citizenship by Investment and the Malta Permanent Residency Program (MPRP)?",
-      a: 'Citizenship by Investment grants a full EU passport with visa-free access to 180+ countries but requires 12–36 months of residency and a higher investment starting at €750,000; MPRP grants long-term residency only (Schengen travel, no EU passport) with no residency requirement and a lower entry point from €100,000.',
+      q: 'How long does Malta Citizenship by Merit take?',
+      a: 'The process generally takes 20 months or more from onboarding to citizenship. Applicants establish and maintain legal residence in Malta during the process, complete multi-tiered due diligence, attend biometric and Oath appointments, and demonstrate continued engagement with Malta.',
     },
     {
-      q: 'Can Indian citizens hold dual citizenship with Malta?',
-      a: 'Malta allows dual citizenship, but India does not — Indian applicants must surrender their Indian passport and can instead apply for an OCI (Overseas Citizen of India) card to retain certain rights in India.',
+      q: 'Can family members be included in a Malta Citizenship by Merit application?',
+      a: 'Yes. The main applicant may include a spouse or civil partner, minor children under 18, and financially dependent unmarried adult children up to age 29, subject to standard background, due diligence, and medical clearances.',
     },
     {
       q: 'How many countries can I visit visa-free with a Malta passport?',
-      a: 'A Maltese passport offers visa-free or visa-on-arrival access to 180+ destinations, including the entire Schengen Zone, the UK, Canada, Singapore, Japan, Australia, and parts of the Middle East like the UAE and Qatar.',
+      a: 'A Maltese passport grants visa-free or visa-on-arrival access to 180+ countries (and up to 185 destinations worldwide), including the United Kingdom, the United States (via ESTA), the European Schengen Zone, Canada, Singapore, and Japan.',
+    },
+    {
+      q: 'Does Malta allow dual citizenship?',
+      a: 'Yes, Malta permits dual and multiple citizenship under federal law, allowing successful applicants to retain their existing nationalities where permitted by their country of origin.',
     },
   ],
 
@@ -736,6 +754,52 @@ export const CITIZENSHIP_FAQ = {
     {
       q: 'Is Nauru a good option for investors seeking privacy?',
       a: "Yes, Nauru's low international profile and limited applicant volume make it appealing to investors prioritizing confidentiality and asset diversification over travel-heavy passport benefits.",
+    },
+  ],
+
+  grenada: [
+    {
+      q: 'What makes Grenada Citizenship by Investment unique compared to other Caribbean programs?',
+      a: 'Grenada is the only Caribbean CBI nation with an active USA E-2 Investor Visa treaty. This enables Grenadian citizens to invest in and operate a business in the United States, granting a lawful residence pathway for themselves and their families.',
+    },
+    {
+      q: 'How much does Grenada Citizenship by Investment cost?',
+      a: 'Under the National Transformation Fund (NTF), the minimum non-refundable contribution starts from USD 235,000 for a single applicant or a family of up to four. Under the real estate route, the minimum investment is USD 270,000 in approved shared tourism developments, plus statutory government processing and due diligence fees.',
+    },
+    {
+      q: 'Can siblings and dependent parents be included in a Grenada application?',
+      a: 'Yes. Grenada offers one of the broadest family inclusion policies in the CBI industry: spouse, children under 30 (no higher education enrollment requirement), parents and grandparents aged 55+, and unmarried biological or adopted siblings aged 18+ without children.',
+    },
+    {
+      q: 'Is there a physical presence or residency requirement in Grenada?',
+      a: 'No, applicants are not required to visit or reside in Grenada before, during, or after their citizenship application is approved.',
+    },
+    {
+      q: 'How long does it take to process a Grenada citizenship application?',
+      a: 'The official processing timeline is typically 6 to 9 months, including comprehensive multi-tier background due diligence checks, virtual interviews, and final cabinet approval.',
+    },
+  ],
+
+  argentina: [
+    {
+      q: 'How does Argentina Citizenship by Investment work?',
+      a: 'Foreign investors can secure an Investor Temporary Residence under Law No. 25.871 by making a productive capital investment in an Argentine enterprise or approved commercial venture (typically from USD 50,000 equivalent). Under National Law No. 346, holding legal residence for just 2 years qualifies the applicant to petition the Argentine Federal Court for full citizenship.',
+    },
+    {
+      q: 'Is Argentina the fastest route to citizenship in the Americas?',
+      a: 'Yes. While most countries require 5 to 10 years of permanent residence, Argentine federal law allows foreign investors with 2 years of continuous legal residence to petition the Federal Court directly for naturalization and an Argentine passport.',
+    },
+    {
+      q: 'What are the visa-free travel benefits of an Argentine passport?',
+      a: 'An Argentine passport is ranked among the top tier worldwide, offering visa-free or visa-on-arrival access to over 170 countries, including the entire European Schengen Zone, the United Kingdom, Japan, Singapore, and New Zealand (via eTA).',
+    },
+    {
+      q: 'Does Argentina allow dual citizenship?',
+      a: 'Yes, Argentina fully permits dual citizenship, allowing you to legally retain your existing nationality while holding Argentine citizenship and a national passport.',
+    },
+    {
+      q: 'Can family members be included under the investor residence in Argentina?',
+      a: 'Yes, the principal investor can sponsor their spouse, dependent children under 18, and dependent parents under the family reunification provisions of Argentine immigration law.',
     },
   ],
 };

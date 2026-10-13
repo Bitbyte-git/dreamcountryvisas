@@ -17,6 +17,7 @@ import {
   submitContactForm,
   isValidPhone,
   isValidEmail,
+  getPhoneSpecForCode,
 } from '../utils/formValidation.js';
 
 // Builds the "Program of interest" dropdown from every service category.
@@ -79,7 +80,7 @@ export default function ConsultationModal({ open, onClose }) {
     const { name, value, type, checked } = e.target;
     const finalValue =
       name === 'phone'
-        ? sanitizePhoneInput(value)
+        ? sanitizePhoneInput(value, form.phoneCode)
         : type === 'checkbox'
         ? checked
         : value;
@@ -89,6 +90,9 @@ export default function ConsultationModal({ open, onClose }) {
       // Reset englishLevel if the person switches away from a PR program
       if (name === 'program' && !PR_PROGRAMS_NEEDING_ENGLISH.includes(finalValue)) {
         next.englishLevel = '';
+      }
+      if (name === 'phoneCode' && prev.phone) {
+        next.phone = sanitizePhoneInput(prev.phone, finalValue);
       }
       return next;
     });
@@ -263,8 +267,10 @@ export default function ConsultationModal({ open, onClose }) {
                 />
                 <input
                   type="tel"
+                  inputMode="numeric"
                   name="phone"
-                  placeholder="81234 56789"
+                  placeholder={getPhoneSpecForCode(form.phoneCode).placeholder}
+                  maxLength={getPhoneSpecForCode(form.phoneCode).max}
                   value={form.phone}
                   onChange={update}
                   onBlur={handleBlur}

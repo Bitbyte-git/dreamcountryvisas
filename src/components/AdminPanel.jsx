@@ -5,7 +5,7 @@ import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Icon } from './Icons.jsx';
 import { getAdminToken, clearAdminToken } from '../utils/adminAuth.js';
-import { CONTACT } from '../data.js';
+import { CONTACT, ALL_COUNTRIES_LIST } from '../data.js';
 
 const RANGES = [
   { key: 'today', label: 'Today' },
@@ -73,6 +73,9 @@ export default function AdminPanel() {
 
 function AdminDashboard() {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('submissions'); // 'submissions' | 'reviews'
+
+  // Submissions state
   const [range, setRange] = useState('today');
   const [customFrom, setCustomFrom] = useState(todayISO());
   const [customTo, setCustomTo] = useState(todayISO());
@@ -83,10 +86,116 @@ function AdminDashboard() {
   const [category, setCategory] = useState('All Categories');
   const [website, setWebsite] = useState('all');
 
+  // Reviews moderation state
+  const [reviewsList, setReviewsList] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewSearch, setReviewSearch] = useState('');
+  const [reviewCountry, setReviewCountry] = useState('all');
+  const [reviewFilterSort, setReviewFilterSort] = useState('recent'); // 'recent' (default) | 'all' | '5' | '4' | '3' | '2' | '1' | 'highest' | 'lowest' | 'helpful'
+  const [reviewError, setReviewError] = useState('');
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState('');
+  const [expandedReviewIds, setExpandedReviewIds] = useState({});
+
+  // Custom delete confirmation modal state
+  // { id: number, clientName: string } | null
+  const [deleteModal, setDeleteModal] = useState(null);
+
+  const toggleExpandReview = (id) => {
+    setExpandedReviewIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const logout = useCallback(() => {
     clearAdminToken();
     navigate('/login', { replace: true });
   }, [navigate]);
+
+  const loadReviews = useCallback(async () => {
+    const token = getAdminToken();
+    if (!token) return;
+    try {
+      setLoadingReviews(true);
+      setReviewError('');
+      const res = await fetch('/api/reviews/admin/all', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.status === 401) {
+        logout();
+        return;
+      }
+      const data = await res.json();
+      if (data.ok) {
+        setReviewsList(data.reviews || []);
+      } else {
+        setReviewError(data.error || 'Failed to load reviews.');
+      }
+    } catch {
+      setReviewError('Network error loading reviews.');
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, [logout]);
+
+  useEffect(() => {
+    if (activeTab === 'reviews') {
+      loadReviews();
+    }
+  }, [activeTab, loadReviews]);
+
+  // Opens the custom delete confirmation modal
+  const handleDeleteReview = (id, clientName) => {
+    setDeleteModal({ id, clientName });
+  };
+
+  // Called when the user clicks "Delete" inside the modal
+  const confirmDelete = async () => {
+    if (!deleteModal) return;
+    const { id } = deleteModal;
+    setDeleteModal(null);
+    const token = getAdminToken();
+    try {
+      const res = await fetch(`/api/reviews/admin/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setReviewsList((prev) => prev.filter((r) => r.id !== id));
+        setReviewSuccessMsg(`Review #${id} permanently deleted.`);
+        setTimeout(() => setReviewSuccessMsg(''), 4000);
+      } else {
+        setReviewError(data.error || 'Failed to delete review');
+        setTimeout(() => setReviewError(''), 4000);
+      }
+    } catch {
+      setReviewError('Network error while deleting review.');
+      setTimeout(() => setReviewError(''), 4000);
+    }
+  };
+
+  const handleToggleStatus = async (id, currentStatus) => {
+    const nextStatus = currentStatus === 'approved' ? 'hidden' : 'approved';
+    const token = getAdminToken();
+    try {
+      const res = await fetch(`/api/reviews/admin/${id}/status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setReviewsList((prev) =>
+          prev.map((r) => (r.id === id ? { ...r, status: nextStatus } : r))
+        );
+      } else {
+        alert(data.error || 'Failed to update status');
+      }
+    } catch {
+      alert('Network error while updating review status');
+    }
+  };
 
   const load = useCallback(async () => {
     const token = getAdminToken();
@@ -154,6 +263,89 @@ function AdminDashboard() {
     rows.forEach((r) => { counts[deriveCategory(r.program)] += 1; });
     return counts;
   }, [rows]);
+
+  const countryOptions = useMemo(() => {
+    const map = new Map();
+    ALL_COUNTRIES_LIST.forEach((c) => {
+      if (c.country && c.country !== 'Other') {
+        map.set(c.country.toLowerCase(), c.country);
+      }
+    });
+    const customSlugs = {
+      uae: 'UAE / Dubai',
+      'antigua-barbuda': 'Antigua & Barbuda',
+      'st-kitts-nevis': 'St. Kitts & Nevis',
+      'st-lucia': 'St. Lucia',
+      general: 'General',
+    };
+    Object.entries(customSlugs).forEach(([k, label]) => {
+      map.set(k, label);
+    });
+    reviewsList.forEach((r) => {
+      if (r.country) {
+        const k = r.country.trim().toLowerCase();
+        if (!map.has(k)) {
+          map.set(k, k.charAt(0).toUpperCase() + k.slice(1));
+        }
+      }
+    });
+    return Array.from(map.entries())
+      .map(([key, label]) => ({ key, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [reviewsList]);
+
+  const visibleReviews = useMemo(() => {
+    const q = reviewSearch.trim().toLowerCase();
+    let list = reviewsList.filter((r) => {
+      if (reviewCountry !== 'all' && (r.country || '').toLowerCase() !== reviewCountry.toLowerCase()) {
+        return false;
+      }
+      if (['1', '2', '3', '4', '5'].includes(reviewFilterSort)) {
+        if (Number(r.rating) !== Number(reviewFilterSort)) {
+          return false;
+        }
+      }
+      if (!q) return true;
+      const haystack = [
+        r.client_name,
+        r.review_title,
+        r.review_text,
+        r.country,
+        r.program,
+      ].filter(Boolean).join(' ').toLowerCase();
+      return haystack.includes(q);
+    });
+
+    if (reviewFilterSort === 'helpful') {
+      list = [...list].sort((a, b) => (Number(b.helpful_count) || 0) - (Number(a.helpful_count) || 0));
+    } else if (reviewFilterSort === 'highest') {
+      list = [...list].sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+    } else if (reviewFilterSort === 'lowest') {
+      list = [...list].sort((a, b) => (Number(a.rating) || 0) - (Number(b.rating) || 0));
+    } else {
+      // Default: recent (newest first)
+      list = [...list].sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+    }
+
+    return list;
+  }, [reviewsList, reviewSearch, reviewCountry, reviewFilterSort]);
+
+  const reviewStats = useMemo(() => {
+    const total = reviewsList.length;
+    let sum = 0;
+    let fiveStar = 0;
+    let fourStar = 0;
+    let totalHelpful = 0;
+    reviewsList.forEach((r) => {
+      const s = Number(r.rating) || 5;
+      sum += s;
+      if (s === 5) fiveStar++;
+      if (s === 4) fourStar++;
+      totalHelpful += Number(r.helpful_count) || 0;
+    });
+    const avg = total > 0 ? (sum / total).toFixed(1) : '5.0';
+    return { total, avg, fiveStar, fourStar, totalHelpful };
+  }, [reviewsList]);
 
   // Shared row shape for both exports — always reflects whatever's
   // currently visible (date range + search + category filters applied).
@@ -303,7 +495,34 @@ function AdminDashboard() {
   return (
     <div className="admin-page" translate="no">
       <div className="container">
-        <div className="admin-header">
+        {/* Top Navigation Tabs */}
+        <div className="admin-nav-tabs">
+          <button
+            type="button"
+            className={`admin-nav-tab ${activeTab === 'submissions' ? 'active' : ''}`}
+            onClick={() => setActiveTab('submissions')}
+          >
+            <Icon name="mail" size={16} />
+            <span>Contact Submissions</span>
+            <span className="admin-tab-count">{rows.length}</span>
+          </button>
+          <button
+            type="button"
+            className={`admin-nav-tab ${activeTab === 'reviews' ? 'active' : ''}`}
+            onClick={() => {
+              setActiveTab('reviews');
+              loadReviews();
+            }}
+          >
+            <span style={{ color: '#f5b301', fontSize: '1.1rem' }}>★</span>
+            <span>Client Reviews Management</span>
+            <span className="admin-tab-count">{reviewsList.length}</span>
+          </button>
+        </div>
+
+        {activeTab === 'submissions' ? (
+          <>
+            <div className="admin-header">
           <div className="admin-header-title">
             <div className="admin-header-icon">
               <Icon name="passport" size={22} />
@@ -484,7 +703,320 @@ function AdminDashboard() {
             </table>
           </div>
         </div>
+          </>
+        ) : (
+          /* ── CLIENT REVIEWS MANAGEMENT TAB (CLEAN, LUXURY, NO ICONS, DC LOGO) ── */
+          <>
+            <div className="admin-header">
+              <div className="admin-header-title">
+                <div className="admin-header-icon admin-dc-header-icon">
+                  <img src="/landing-img/DC-log.webp" alt="Dream Country Visas" className="admin-dc-logo-img" />
+                </div>
+                <div>
+                  <p className="admin-eyebrow">CLIENT FEEDBACK &amp; RATINGS</p>
+                  <h1>Client Reviews Management</h1>
+                  <p className="admin-header-sub">Moderate verified reviews, monitor client satisfaction, and permanently delete inappropriate entries.</p>
+                </div>
+              </div>
+              <button className="admin-logout-btn" onClick={logout}>
+                Log Out
+              </button>
+            </div>
+
+            {/* Clickable Reviews Stats Row */}
+            <div className="admin-stats-row">
+              <div
+                className={`admin-stat-card clickable ${reviewFilterSort === 'recent' || reviewFilterSort === 'all' ? 'active' : ''}`}
+                onClick={() => {
+                  setReviewFilterSort('recent');
+                  setReviewCountry('all');
+                  setReviewSearch('');
+                }}
+                title="Click to view all recent reviews"
+              >
+                <span className="admin-stat-value">{reviewStats.total}</span>
+                <span className="admin-stat-label">Total Reviews</span>
+              </div>
+
+              <div
+                className={`admin-stat-card clickable cat-realestate ${reviewFilterSort === 'highest' ? 'active' : ''}`}
+                onClick={() => setReviewFilterSort(reviewFilterSort === 'highest' ? 'recent' : 'highest')}
+                title="Click to sort by highest rating"
+              >
+                <span className="admin-stat-value">{reviewStats.avg} / 5</span>
+                <span className="admin-stat-label">Average Rating</span>
+              </div>
+
+              <div
+                className={`admin-stat-card clickable cat-citizenship ${reviewFilterSort === '5' ? 'active' : ''}`}
+                onClick={() => setReviewFilterSort(reviewFilterSort === '5' ? 'recent' : '5')}
+                title="Click to filter 5-star reviews"
+              >
+                <span className="admin-stat-value">{reviewStats.fiveStar}</span>
+                <span className="admin-stat-label">5-Star Reviews</span>
+              </div>
+
+              <div
+                className={`admin-stat-card clickable cat-residency ${reviewFilterSort === '4' ? 'active' : ''}`}
+                onClick={() => setReviewFilterSort(reviewFilterSort === '4' ? 'recent' : '4')}
+                title="Click to filter 4-star reviews"
+              >
+                <span className="admin-stat-value">{reviewStats.fourStar}</span>
+                <span className="admin-stat-label">4-Star Reviews</span>
+              </div>
+
+              <div
+                className={`admin-stat-card clickable cat-pr ${reviewFilterSort === 'helpful' ? 'active' : ''}`}
+                onClick={() => setReviewFilterSort(reviewFilterSort === 'helpful' ? 'recent' : 'helpful')}
+                title="Click to sort by most helpful"
+              >
+                <span className="admin-stat-value">{reviewStats.totalHelpful}</span>
+                <span className="admin-stat-label">Helpful Upvotes</span>
+              </div>
+            </div>
+
+            {/* Reviews Table Card */}
+            <div className="admin-card">
+              <div className="admin-toolbar" style={{ marginTop: 0 }}>
+                <div className="admin-search-wrap admin-search-no-icon">
+                  <input
+                    type="text"
+                    placeholder="Search by client name, review text, program…"
+                    value={reviewSearch}
+                    onChange={(e) => setReviewSearch(e.target.value)}
+                    className="admin-search-input"
+                  />
+                </div>
+
+                <select
+                  className="admin-category-select"
+                  value={reviewCountry}
+                  onChange={(e) => setReviewCountry(e.target.value)}
+                >
+                  <option value="all">All Countries</option>
+                  {countryOptions.map((c) => (
+                    <option key={c.key} value={c.key}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+
+                <select
+                  className="admin-category-select"
+                  value={reviewFilterSort}
+                  onChange={(e) => setReviewFilterSort(e.target.value)}
+                >
+                  <option value="recent">Recent (Default)</option>
+                  <option value="all">All Reviews</option>
+                  <option value="5">5 Stars only</option>
+                  <option value="4">4 Stars only</option>
+                  <option value="3">3 Stars only</option>
+                  <option value="2">2 Stars</option>
+                  <option value="1">1 Star</option>
+                  <option value="highest">Highest Rating</option>
+                  <option value="lowest">Lowest Rating</option>
+                  <option value="helpful">Most Helpful</option>
+                </select>
+
+                <button
+                  type="button"
+                  className="admin-export-btn"
+                  onClick={loadReviews}
+                  title="Refresh reviews from database"
+                >
+                  Refresh
+                </button>
+              </div>
+
+              {reviewSuccessMsg && (
+                <div style={{ padding: '10px 14px', background: '#ecfdf5', color: '#047857', borderRadius: '8px', marginBottom: '14px', fontSize: '0.85rem', fontWeight: 600 }}>
+                  {reviewSuccessMsg}
+                </div>
+              )}
+              {reviewError && <p className="login-error">{reviewError}</p>}
+
+              <p className="admin-count">
+                {loadingReviews ? 'Loading reviews…' : `${visibleReviews.length} of ${reviewsList.length} review${reviewsList.length === 1 ? '' : 's'}`}
+              </p>
+
+              <div className="admin-table-wrap">
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>S.No</th>
+                      <th>Date</th>
+                      <th>Client Name</th>
+                      <th>Country &amp; Program</th>
+                      <th>Rating</th>
+                      <th style={{ minWidth: '280px' }}>Review Details</th>
+                      <th>Helpful</th>
+                      <th>Status</th>
+                      <th style={{ textAlign: 'center' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!loadingReviews && visibleReviews.length === 0 && (
+                      <tr>
+                        <td colSpan={9} className="admin-empty">No client reviews match the selected filter.</td>
+                      </tr>
+                    )}
+                    {visibleReviews.map((rev, i) => {
+                      const created = new Date(rev.created_at);
+                      const meta = (() => {
+                        if (rev.review_title && rev.review_title.trim().startsWith('{')) {
+                          try {
+                            return JSON.parse(rev.review_title);
+                          } catch {
+                            return null;
+                          }
+                        }
+                        return null;
+                      })();
+                      const humanTitle = !meta && rev.review_title && !rev.review_title.startsWith('{')
+                        ? rev.review_title
+                        : null;
+                      const isExpanded = Boolean(expandedReviewIds[rev.id]);
+                      const fullText = rev.review_text || '';
+                      const isLongText = fullText.length > 150;
+                      const displayText = isLongText && !isExpanded
+                        ? `${fullText.slice(0, 150)}…`
+                        : fullText;
+
+                      return (
+                        <tr key={rev.id}>
+                          <td>{i + 1}</td>
+                          <td style={{ whiteSpace: 'nowrap' }}>
+                            <div style={{ fontWeight: 600 }}>{created.toLocaleDateString()}</div>
+                            <small style={{ color: 'var(--muted)' }}>
+                              {created.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </small>
+                          </td>
+                          <td>
+                            <div className="admin-client-info">
+                              <strong className="admin-client-name">{rev.client_name}</strong>
+                              {meta?.phone && (
+                                <div className="admin-client-phone">
+                                  <span className="admin-chip-phone">{meta.phone}</span>
+                                </div>
+                              )}
+                              {rev.verified ? (
+                                <div className="admin-client-badge-row">
+                                  <span className="dc-verified-badge" style={{ fontSize: '0.68rem' }}>Verified</span>
+                                </div>
+                              ) : null}
+                            </div>
+                          </td>
+                          <td>
+                            <span className="admin-cat-badge cat-citizenship" style={{ textTransform: 'capitalize' }}>
+                              {rev.country || 'General'}
+                            </span>
+                            <div style={{ fontSize: '0.74rem', color: 'var(--muted)', marginTop: '3px' }}>
+                              {rev.program || 'Investor Program'}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="admin-rating-badge-pill">
+                              {Number(rev.rating).toFixed(1)} / 5.0
+                            </div>
+                          </td>
+                          <td className="admin-review-cell">
+                            {humanTitle && (
+                              <div className="admin-review-headline">{humanTitle}</div>
+                            )}
+                            <div className="admin-review-bubble">
+                              <p className="admin-review-paragraph">
+                                "{displayText}"
+                              </p>
+                              {isLongText && (
+                                <button
+                                  type="button"
+                                  className="admin-review-expand-btn"
+                                  onClick={() => toggleExpandReview(rev.id)}
+                                >
+                                  {isExpanded ? 'Show Less' : 'Read Full Review'}
+                                </button>
+                              )}
+                            </div>
+                            {meta && (
+                              <div className="admin-review-security-bar">
+                                <span className="admin-sec-chip" title={`Anti-Spam Verification IP: ${meta.ip || 'Recorded'}`}>
+                                  Anti-Spam Verified {meta.ip ? `• IP: ${meta.ip}` : ''}
+                                </span>
+                              </div>
+                            )}
+                          </td>
+                          <td>
+                            <span className="admin-helpful-pill">
+                              {rev.helpful_count || 0} Upvotes
+                            </span>
+                          </td>
+                          <td>
+                            <span className={`admin-status-badge status-${rev.status || 'approved'}`}>
+                              {rev.status === 'hidden' ? 'Hidden' : 'Approved'}
+                            </span>
+                          </td>
+                          <td style={{ textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            <button
+                              type="button"
+                              className="admin-btn-status"
+                              onClick={() => handleToggleStatus(rev.id, rev.status)}
+                              title={rev.status === 'hidden' ? 'Approve & publish review' : 'Hide from public view'}
+                            >
+                              {rev.status === 'hidden' ? 'Publish' : 'Hide'}
+                            </button>
+                            <button
+                              type="button"
+                              className="admin-btn-delete"
+                              onClick={() => handleDeleteReview(rev.id, rev.client_name)}
+                              title="Permanently delete review"
+                            >
+                              Delete
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
       </div>
+
+      {/* ── Custom Delete Confirmation Modal ── */}
+      {deleteModal && (
+        <div className="admin-delete-overlay" onClick={() => setDeleteModal(null)}>
+          <div className="admin-delete-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="admin-delete-modal-icon">
+              <span className="admin-delete-modal-x">&#x26A0;</span>
+            </div>
+            <h2 className="admin-delete-modal-title">Delete Review?</h2>
+            <p className="admin-delete-modal-body">
+              You are about to permanently delete the review from{' '}
+              <strong>{deleteModal.clientName}</strong>.
+              <br />
+              <span className="admin-delete-modal-warn">This action cannot be undone.</span>
+            </p>
+            <div className="admin-delete-modal-actions">
+              <button
+                type="button"
+                className="admin-delete-modal-cancel"
+                onClick={() => setDeleteModal(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="admin-delete-modal-confirm"
+                onClick={confirmDelete}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

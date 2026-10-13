@@ -6,6 +6,7 @@
   <url><loc>https://dreamcountryvisas.com/about</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://dreamcountryvisas.com/contact</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://dreamcountryvisas.com/licenses</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://dreamcountryvisas.com/passport-index</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
 
   <!-- Citizenship -->
   <url><loc>https://dreamcountryvisas.com/citizenship</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
@@ -14,6 +15,8 @@
   <url><loc>https://dreamcountryvisas.com/citizenship/malta</loc><priority>0.8</priority></url>
   <url><loc>https://dreamcountryvisas.com/citizenship/vanuatu</loc><priority>0.8</priority></url>
   <url><loc>https://dreamcountryvisas.com/citizenship/nauru</loc><priority>0.8</priority></url>
+  <url><loc>https://dreamcountryvisas.com/citizenship/grenada</loc><priority>0.8</priority></url>
+  <url><loc>https://dreamcountryvisas.com/citizenship/argentina</loc><priority>0.8</priority></url>
 
   <!-- Residency -->
   <url><loc>https://dreamcountryvisas.com/residency</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
