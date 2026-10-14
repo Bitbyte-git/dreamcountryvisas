@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { Icon } from '../components/Icons.jsx';
 import { CONTACT, RESIDENCY_FAQ } from '../data.js';
 import ConsultationModal from '../components/ConsultationModal.jsx';
 import FAQ from '../components/FAQ.jsx';
+import { isProgramVisible } from '../utils/programVisibility.js';
 
 // =====================================================================
 // ALL residency country pages live in this ONE file.
@@ -503,6 +504,10 @@ export default function ResidencyPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [slug]);
+
+  if (!isProgramVisible(`/residency/${slug}`)) {
+    return <Navigate to="/residency" replace />;
+  }
 
   if (!country) {
     return (

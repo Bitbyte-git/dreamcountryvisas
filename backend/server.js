@@ -17,6 +17,7 @@ import contactRoutes from './routes/contact.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
 import reviewsRoutes from './routes/reviews.js';
+import { isProgramVisible } from '../src/utils/programVisibility.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const distPath = path.join(__dirname, '..', 'dist');
@@ -93,7 +94,11 @@ for (const [file, type] of [['robots.txt', 'text/plain'], ['sitemap.xml', 'appli
   app.get(`/${file}`, (req, res, next) => {
     fs.readFile(path.join(seoPath, file), 'utf8', (err, text) => {
       if (err) return next(err);
-      res.type(type).send(isInDomain(req) ? toInDomain(text) : text);
+      const visibleText = file === 'sitemap.xml'
+        ? text.replace(/<url>\s*<loc>([^<]+)<\/loc>[\s\S]*?<\/url>/g, (entry, url) =>
+            isProgramVisible(new URL(url).pathname) ? entry : '')
+        : text;
+      res.type(type).send(isInDomain(req) ? toInDomain(visibleText) : visibleText);
     });
   });
 }

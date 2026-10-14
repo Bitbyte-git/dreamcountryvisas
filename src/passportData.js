@@ -4,13 +4,15 @@
 // Zero AI imagery — uses official national passport scans & verified photography
 // =====================================================================
 
+import { isProgramVisible, isSpainResidencyHidden } from './utils/programVisibility.js';
+
 export const PASSPORT_STATS_SUMMARY = {
-  totalPrograms: 22,
+  totalPrograms: isSpainResidencyHidden() ? 21 : 22,
   highestScore: 176, // Singapore (176) & Germany/Spain (175)
   medianRank: 4,
   avgVisaFree: 135,
   cbiPrograms: 7,
-  rbiPrograms: 9,
+  rbiPrograms: isSpainResidencyHidden() ? 8 : 9,
   realEstatePrograms: 3,
   prPrograms: 3,
   workPrograms: 5,
@@ -616,4 +618,4 @@ export const DC_PASSPORTS = [
       { label: 'Settlement', value: 'Eligible for Singapore PR in 2 Yrs' },
     ],
   },
-];
+].filter((passport) => isProgramVisible(passport.pathwayLink));

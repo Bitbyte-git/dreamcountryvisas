@@ -4,6 +4,8 @@
 // Image file names used are listed in each section below.
 // ---------------------------------------------------------------
 
+import { isProgramVisible, isSpainResidencyHidden } from './utils/programVisibility.js';
+
 export const CONTACT = {
   phone: '+91 8595968122',
   email: 'consult@dreamcountryvisas.com',
@@ -289,7 +291,7 @@ export const DESTINATIONS = [
   { name: 'Latvia', price: 'from 250,000', image: '/landing-img/re-Latvia.webp' },
   { name: 'Italy', price: 'from 250,000', image: '/landing-img/re-italy.webp' },
   { name: 'Spain', price: 'from 500,000', image: '/landing-img/re-spain.webp' },
-];
+].filter((destination) => isProgramVisible(`/residency/${destination.name.toLowerCase().replace(/\s+/g, '-')}`));
 
 export const SERVICES = [
   {
@@ -533,7 +535,7 @@ export const RESIDENCY_MENU = {
         { name: 'Latvia', sub: 'Golden Visa', image: '/images/res-latvia.webp', link: '/residency/latvia' },
         { name: 'Italy', sub: 'Golden Visa', image: '/images/res-italy.webp', link: '/residency/italy' },
         { name: 'Spain', sub: 'Golden Visa', image: '/images/res-spain.webp', link: '/residency/spain' },
-      ],
+      ].filter((program) => isProgramVisible(program.link)),
     },
   ],
   offer: {
@@ -1037,7 +1039,7 @@ export const RESIDENCY_OVERVIEW_FAQ = [
     q: 'Can my family be included across all these residency programs?',
     a: 'Yes, every program listed allows you to include your spouse and dependent children, and several — including Spain and Latvia — also allow dependent parents.',
   },
-];
+].filter((faq) => !isSpainResidencyHidden() || !/\bSpain\b/i.test(faq.a));
 
 // FAQ shown on the Citizenship Overview page (/citizenship)
 export const CITIZENSHIP_OVERVIEW_FAQ = [

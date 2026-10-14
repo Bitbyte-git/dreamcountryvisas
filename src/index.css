@@ -9960,16 +9960,15 @@ html:lang(fr) body {
 }
 
 .admin-stat-card.active {
-  background: linear-gradient(145deg, var(--navy) 0%, var(--navy-dark) 100%);
-  border-color: var(--navy);
+  border-color: #f5b301;
 }
 
 .admin-stat-card.active .admin-stat-value {
-  color: #fff;
+  color: var(--navy);
 }
 
 .admin-stat-card.active .admin-stat-label {
-  color: rgba(255, 255, 255, 0.75);
+  color: var(--muted);
 }
 
 .admin-card {
@@ -12866,40 +12865,27 @@ button[type="submit"]:disabled {
   object-fit: contain !important;
 }
 
-/* ── CLICKABLE STAT CARDS ── */
-.admin-stat-card.clickable {
-  cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative;
-  user-select: none;
-}
-
-.admin-stat-card.clickable:hover {
+/* ── CLICKABLE STAT CARDS (reviews tab — button elements) ── */
+/* Cards are <button> elements — hover/active handled here */
+.admin-stat-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.12);
   border-color: rgba(245, 179, 1, 0.6);
 }
 
-.admin-stat-card.clickable.active {
-  border: 2px solid var(--navy) !important;
-  box-shadow: 0 6px 18px rgba(27, 42, 107, 0.25) !important;
-  background: #f8fafc;
+/* Active state: gold-border + warm tint — text stays dark/readable */
+.admin-stat-card.active {
+  background: #fffbf0 !important;
+  border: 2px solid #f5b301 !important;
+  box-shadow: 0 6px 18px rgba(245, 179, 1, 0.18) !important;
 }
 
-.admin-stat-card.clickable.active.cat-citizenship {
-  border-color: #047857 !important;
+.admin-stat-card.active .admin-stat-value {
+  color: var(--navy) !important;
 }
 
-.admin-stat-card.clickable.active.cat-residency {
-  border-color: #0e7490 !important;
-}
-
-.admin-stat-card.clickable.active.cat-realestate {
-  border-color: #d97706 !important;
-}
-
-.admin-stat-card.clickable.active.cat-pr {
-  border-color: #7c3aed !important;
+.admin-stat-card.active .admin-stat-label {
+  color: var(--muted) !important;
 }
 
 /* ── CLEAN RATING BADGE (NO STARS) ── */

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { pool } from '../db.js';
 import { requireAdmin } from '../middleware/auth.js';
+import { isPublicReviewVisible } from '../../src/utils/programVisibility.js';
 
 const router = Router();
 
@@ -17,7 +18,9 @@ router.get('/', async (req, res) => {
     }
 
     query += ' ORDER BY created_at DESC, id DESC';
-    const [rows] = await pool.query(query, params);
+    const [storedRows] = await pool.query(query, params);
+    // Hide unavailable programs publicly; preserve all records for admin moderation.
+    const rows = storedRows.filter(isPublicReviewVisible);
 
     // Compute Amazon/Flipkart-style rating stats
     const total = rows.length;

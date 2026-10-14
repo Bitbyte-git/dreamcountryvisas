@@ -725,8 +725,9 @@ function AdminDashboard() {
 
             {/* Clickable Reviews Stats Row */}
             <div className="admin-stats-row">
-              <div
-                className={`admin-stat-card clickable ${reviewFilterSort === 'recent' || reviewFilterSort === 'all' ? 'active' : ''}`}
+              <button
+                type="button"
+                className={`admin-stat-card ${reviewFilterSort === 'recent' || reviewFilterSort === 'all' ? 'active' : ''}`}
                 onClick={() => {
                   setReviewFilterSort('recent');
                   setReviewCountry('all');
@@ -736,43 +737,47 @@ function AdminDashboard() {
               >
                 <span className="admin-stat-value">{reviewStats.total}</span>
                 <span className="admin-stat-label">Total Reviews</span>
-              </div>
+              </button>
 
-              <div
-                className={`admin-stat-card clickable cat-realestate ${reviewFilterSort === 'highest' ? 'active' : ''}`}
+              <button
+                type="button"
+                className={`admin-stat-card ${reviewFilterSort === 'highest' ? 'active' : ''}`}
                 onClick={() => setReviewFilterSort(reviewFilterSort === 'highest' ? 'recent' : 'highest')}
                 title="Click to sort by highest rating"
               >
                 <span className="admin-stat-value">{reviewStats.avg} / 5</span>
                 <span className="admin-stat-label">Average Rating</span>
-              </div>
+              </button>
 
-              <div
-                className={`admin-stat-card clickable cat-citizenship ${reviewFilterSort === '5' ? 'active' : ''}`}
+              <button
+                type="button"
+                className={`admin-stat-card ${reviewFilterSort === '5' ? 'active' : ''}`}
                 onClick={() => setReviewFilterSort(reviewFilterSort === '5' ? 'recent' : '5')}
                 title="Click to filter 5-star reviews"
               >
                 <span className="admin-stat-value">{reviewStats.fiveStar}</span>
                 <span className="admin-stat-label">5-Star Reviews</span>
-              </div>
+              </button>
 
-              <div
-                className={`admin-stat-card clickable cat-residency ${reviewFilterSort === '4' ? 'active' : ''}`}
+              <button
+                type="button"
+                className={`admin-stat-card ${reviewFilterSort === '4' ? 'active' : ''}`}
                 onClick={() => setReviewFilterSort(reviewFilterSort === '4' ? 'recent' : '4')}
                 title="Click to filter 4-star reviews"
               >
                 <span className="admin-stat-value">{reviewStats.fourStar}</span>
                 <span className="admin-stat-label">4-Star Reviews</span>
-              </div>
+              </button>
 
-              <div
-                className={`admin-stat-card clickable cat-pr ${reviewFilterSort === 'helpful' ? 'active' : ''}`}
+              <button
+                type="button"
+                className={`admin-stat-card ${reviewFilterSort === 'helpful' ? 'active' : ''}`}
                 onClick={() => setReviewFilterSort(reviewFilterSort === 'helpful' ? 'recent' : 'helpful')}
                 title="Click to sort by most helpful"
               >
                 <span className="admin-stat-value">{reviewStats.totalHelpful}</span>
                 <span className="admin-stat-label">Helpful Upvotes</span>
-              </div>
+              </button>
             </div>
 
             {/* Reviews Table Card */}

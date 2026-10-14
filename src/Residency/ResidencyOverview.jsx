@@ -4,6 +4,7 @@ import { Icon } from '../components/Icons.jsx';
 import { RESIDENCY_OVERVIEW_FAQ } from '../data.js';
 import FAQ from '../components/FAQ.jsx';
 import ConsultationModal from '../components/ConsultationModal.jsx';
+import { isProgramVisible } from '../utils/programVisibility.js';
 
 export default function ResidencyOverview() {
   const [showConsultation, setShowConsultation] = useState(false);
@@ -148,7 +149,7 @@ export default function ResidencyOverview() {
       ],
       link: '/residency/spain',
     },
-  ];
+  ].filter((program) => isProgramVisible(program.link));
 
   return (
     <div className="ov-page">
